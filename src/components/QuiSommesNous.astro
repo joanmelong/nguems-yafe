@@ -1,4 +1,6 @@
 ---
+import TextType from './TextType.astro';
+
 const values = [
   {
     label: 'Bien-être',
@@ -23,7 +25,16 @@ const values = [
     <div class="about-copy">
       <span class="section-kicker">Qui sommes-nous ?</span>
       <h2 class="section-title" id="about-title">
-        Une entreprise proche des routines beauté et des points de vente.
+        <TextType
+          text={['Une entreprise proche des routines beauté et des points de vente.']}
+          typingSpeed={62}
+          pauseDuration={1400}
+          showCursor
+          cursorCharacter="_"
+          deletingSpeed={42}
+          variableSpeedEnabled={false}
+          cursorBlinkDuration={0.55}
+        />
       </h2>
       <p class="section-copy">
         EREC CAMEROUN réunit des gammes de soins, des produits complémentaires et

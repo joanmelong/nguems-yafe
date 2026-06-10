@@ -97,14 +97,6 @@ export const productRanges: ProductRange[] = [
   },
 ];
 
-export const productCategories: ProductCategory[] = [
-  'lait',
-  'savon',
-  'crème',
-  'gel douche',
-  'packs',
-];
-
 export const products: Product[] = [
   {
     id: 'nguems-lait-hydratant',

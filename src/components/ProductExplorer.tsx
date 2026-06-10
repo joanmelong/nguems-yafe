@@ -19,22 +19,63 @@ interface ProductExplorerProduct {
 
 interface ProductExplorerProps {
   ranges: ProductRange[];
-  categories: ProductCategory[];
   products: ProductExplorerProduct[];
   whatsappPhone: string;
 }
-
-const viewOptions: Array<{ value: ProductView; label: string }> = [
-  { value: 'carousel', label: 'Carousel' },
-  { value: 'grid', label: 'Grille' },
-  { value: 'list', label: 'Liste' },
-];
 
 const normalize = (value: string) =>
   value
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+
+const shortRangeLabel = (range: ProductRange) => {
+  if (range.id === 'nguems-cosmetics') return "NGUEM'S";
+  if (range.id === 'mavela') return 'MAVELA';
+  return 'Packaging';
+};
+
+const CarouselIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <path
+      d="M3 9v6M21 9v6"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
+const GridIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"
+      fill="none"
+      stroke="currentColor"
+      strokeLinejoin="round"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
+const ListIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="2.3"
+    />
+  </svg>
+);
 
 const ChevronLeftIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -61,6 +102,12 @@ const ChevronRightIcon = () => (
     />
   </svg>
 );
+
+const viewOptions: Array<{ value: ProductView; label: string; icon: () => JSX.Element }> = [
+  { value: 'carousel', label: 'Carousel', icon: CarouselIcon },
+  { value: 'grid', label: 'Grille', icon: GridIcon },
+  { value: 'list', label: 'Liste', icon: ListIcon },
+];
 
 const scrollRange = (rangeId: string, direction: 'left' | 'right') => {
   const track = document.getElementById(`track-${rangeId}`);
@@ -121,36 +168,24 @@ const ProductCard = ({
   </article>
 );
 
-const ProductExplorer = ({
-  ranges,
-  categories,
-  products,
-  whatsappPhone,
-}: ProductExplorerProps) => {
+const ProductExplorer = ({ ranges, products, whatsappPhone }: ProductExplorerProps) => {
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<ProductCategory | 'all'>('all');
+  const [activeRange, setActiveRange] = useState<ProductRangeId>(ranges[0]?.id || 'nguems-cosmetics');
   const [view, setView] = useState<ProductView>('carousel');
+
+  const activeRangeData = ranges.find((range) => range.id === activeRange) || ranges[0];
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = normalize(query);
 
     return products.filter((product) => {
-      const matchesCategory = category === 'all' || product.category === category;
+      const matchesRange = product.range === activeRange;
       const searchSource = normalize(
         [product.name, product.category, product.shortDescription, ...product.benefits].join(' ')
       );
-      return matchesCategory && searchSource.includes(normalizedQuery);
+      return matchesRange && searchSource.includes(normalizedQuery);
     });
-  }, [category, products, query]);
-
-  const productsByRange = useMemo(
-    () =>
-      ranges.map((range) => ({
-        range,
-        products: filteredProducts.filter((product) => product.range === range.id),
-      })),
-    [filteredProducts, ranges]
-  );
+  }, [activeRange, products, query]);
 
   const totalResults = filteredProducts.length;
 
@@ -164,8 +199,7 @@ const ProductExplorer = ({
               Trois gammes pour conseiller, vendre et présenter.
             </h2>
             <p className="section-copy">
-              Recherchez un produit, filtrez par catégorie ou changez la vue selon votre manière de
-              parcourir le catalogue.
+              Choisissez une gamme, recherchez un produit et adaptez l’affichage à votre navigation.
             </p>
           </div>
 
@@ -179,108 +213,101 @@ const ProductExplorer = ({
               aria-label="Rechercher un produit"
             />
 
-            <div className="filter-row" aria-label="Catégories">
-              <button
-                className="chip"
-                type="button"
-                aria-pressed={category === 'all'}
-                onClick={() => setCategory('all')}
-              >
-                Tous
-              </button>
-              {categories.map((item) => (
+            <div className="filter-row range-tabs" aria-label="Gammes">
+              {ranges.map((range) => (
                 <button
                   className="chip"
                   type="button"
-                  key={item}
-                  aria-pressed={category === item}
-                  onClick={() => setCategory(item)}
+                  key={range.id}
+                  aria-pressed={activeRange === range.id}
+                  onClick={() => setActiveRange(range.id)}
                 >
-                  {item}
+                  {shortRangeLabel(range)}
                 </button>
               ))}
             </div>
 
             <div className="view-row" aria-label="Mode d’affichage">
-              {viewOptions.map((option) => (
-                <button
-                  className="view-button"
-                  type="button"
-                  key={option.value}
-                  aria-pressed={view === option.value}
-                  onClick={() => setView(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
+              {viewOptions.map((option) => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    className="view-button view-button-icon"
+                    type="button"
+                    key={option.value}
+                    aria-pressed={view === option.value}
+                    aria-label={`Vue ${option.label}`}
+                    title={option.label}
+                    onClick={() => setView(option.value)}
+                  >
+                    <Icon />
+                    <span className="sr-only">{option.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {totalResults === 0 ? (
-          <div className="empty-state">Aucun produit ne correspond à cette recherche.</div>
-        ) : (
-          productsByRange.map(({ range, products: rangeProducts }) => {
-            if (rangeProducts.length === 0) return null;
+        {activeRangeData && (
+          <section
+            className="range-section"
+            id={`gamme-${activeRangeData.id}`}
+            aria-labelledby={`title-${activeRangeData.id}`}
+          >
+            <div className="range-header">
+              <div>
+                <h3 id={`title-${activeRangeData.id}`}>{activeRangeData.label}</h3>
+                <p>{activeRangeData.summary}</p>
+              </div>
 
-            return (
-              <section
-                className="range-section"
-                id={`gamme-${range.id}`}
-                key={range.id}
-                aria-labelledby={`title-${range.id}`}
+              {view === 'carousel' && totalResults > 0 && (
+                <div className="carousel-actions" aria-label={`Navigation ${activeRangeData.label}`}>
+                  <button
+                    className="icon-button"
+                    type="button"
+                    onClick={() => scrollRange(activeRangeData.id, 'left')}
+                    aria-label={`Voir les produits précédents de ${activeRangeData.label}`}
+                  >
+                    <ChevronLeftIcon />
+                  </button>
+                  <button
+                    className="icon-button"
+                    type="button"
+                    onClick={() => scrollRange(activeRangeData.id, 'right')}
+                    aria-label={`Voir les produits suivants de ${activeRangeData.label}`}
+                  >
+                    <ChevronRightIcon />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {totalResults === 0 ? (
+              <div className="empty-state">Aucun produit ne correspond à cette recherche.</div>
+            ) : (
+              <div
+                className={
+                  view === 'carousel'
+                    ? 'product-track'
+                    : view === 'grid'
+                      ? 'product-grid'
+                      : 'product-list'
+                }
+                id={view === 'carousel' ? `track-${activeRangeData.id}` : undefined}
               >
-                <div className="range-header">
-                  <div>
-                    <h3 id={`title-${range.id}`}>{range.label}</h3>
-                    <p>{range.summary}</p>
-                  </div>
-
-                  {view === 'carousel' && (
-                    <div className="carousel-actions" aria-label={`Navigation ${range.label}`}>
-                      <button
-                        className="icon-button"
-                        type="button"
-                        onClick={() => scrollRange(range.id, 'left')}
-                        aria-label={`Voir les produits précédents de ${range.label}`}
-                      >
-                        <ChevronLeftIcon />
-                      </button>
-                      <button
-                        className="icon-button"
-                        type="button"
-                        onClick={() => scrollRange(range.id, 'right')}
-                        aria-label={`Voir les produits suivants de ${range.label}`}
-                      >
-                        <ChevronRightIcon />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div
-                  className={
-                    view === 'carousel'
-                      ? 'product-track'
-                      : view === 'grid'
-                        ? 'product-grid'
-                        : 'product-list'
-                  }
-                  id={view === 'carousel' ? `track-${range.id}` : undefined}
-                >
-                  {rangeProducts.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      rangeLabel={range.label}
-                      view={view}
-                      whatsappPhone={whatsappPhone}
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          })
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    rangeLabel={shortRangeLabel(activeRangeData)}
+                    view={view}
+                    whatsappPhone={whatsappPhone}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         )}
       </div>
     </section>
