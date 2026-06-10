@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+import { testimonials } from '../data/site';
+---
+
+<section class="section" id="temoignages" aria-labelledby="testimonials-title">
+  <div class="container">
+    <span class="section-kicker">Témoignages</span>
+    <h2 class="section-title" id="testimonials-title">Des valeurs visibles dans l’expérience client.</h2>
+    <p class="section-copy">
+      Les photos avant/après sont des emplacements prêts à recevoir les vrais
+      visuels EREC. La structure est déjà prévue pour des témoignages vérifiés.
+    </p>
+
+    <div class="testimonials-grid">
+      {
+        testimonials.map((testimonial) => (
+          <article class="testimonial-card">
+            <div class="before-after">
+              <figure>
+                <Image
+                  src={testimonial.beforeImage}
+                  alt={`Avant - ${testimonial.value}`}
+                  widths={[280, 420]}
+                  sizes="(max-width: 1024px) 50vw, 190px"
+                  loading="lazy"
+                />
+                <figcaption>Avant</figcaption>
+              </figure>
+              <figure>
+                <Image
+                  src={testimonial.afterImage}
+                  alt={`Après - ${testimonial.value}`}
+                  widths={[280, 420]}
+                  sizes="(max-width: 1024px) 50vw, 190px"
+                  loading="lazy"
+                />
+                <figcaption>Après</figcaption>
+              </figure>
+            </div>
+            <div class="testimonial-body">
+              <span class="product-pill">{testimonial.value}</span>
+              <blockquote>“{testimonial.quote}”</blockquote>
+              <p class="testimonial-author">
+                {testimonial.name} - {testimonial.location}
+              </p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

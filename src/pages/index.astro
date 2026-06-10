@@ -1,18 +1,55 @@
 ---
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import NewsBanner from '../components/NewsBanner.astro';
+import QuiSommesNous from '../components/QuiSommesNous.astro';
+import ProductExplorer from '../components/ProductExplorer';
+import Temoignages from '../components/Temoignages.astro';
+import PromoteLocation from '../components/PromoteLocation.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
 import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero';
-import Catalog from '../components/Catalog';
-import Diagnostic from '../components/Diagnostic';
-import ProofAndLocation from '../components/ProofAndLocation';
-import WhatsAppButton from '../components/WhatsAppButton';
+import { getImage } from 'astro:assets';
+import {
+  contact,
+  productCategories,
+  productRanges,
+  products,
+  siteMeta,
+} from '../data/site';
+
+const productExplorerProducts = await Promise.all(
+  products.map(async (product) => {
+    const optimizedImage = await getImage({
+      src: product.image,
+      width: 640,
+      format: 'webp',
+    });
+
+    return {
+      ...product,
+      image: optimizedImage.src,
+    };
+  })
+);
 ---
 
-<Layout title="NGUEM'S - Le secret de la beauté">
+<Layout title={siteMeta.title} description={siteMeta.description}>
+  <Header />
   <main>
-    <Hero client:load />
-    <Catalog client:load />
-    <Diagnostic client:load />
-    <ProofAndLocation client:load />
-    <WhatsAppButton client:load />
+    <Hero />
+    <NewsBanner />
+    <QuiSommesNous />
+    <ProductExplorer
+      client:visible
+      ranges={productRanges}
+      categories={productCategories}
+      products={productExplorerProducts}
+      whatsappPhone={contact.phone}
+    />
+    <Temoignages />
+    <PromoteLocation />
+    <Contact />
   </main>
+  <Footer />
 </Layout>

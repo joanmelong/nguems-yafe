@@ -1,0 +1,41 @@
+---
+import { contact, navItems, siteMeta } from '../data/site';
+
+const year = new Date().getFullYear();
+const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
+  contact.whatsappMessage
+)}`;
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand-mark" href="#top">
+          <span>{siteMeta.brand}</span>
+        </a>
+        <p>{siteMeta.subtitle}</p>
+      </div>
+
+      <nav aria-label="Navigation pied de page">
+        <ul class="footer-nav-list">
+          {
+            navItems.map((item) => (
+              <li>
+                <a href={item.href}>{item.label}</a>
+              </li>
+            ))
+          }
+          <li>
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© {year} EREC CAMEROUN</span>
+      <span>Bien-être, esthétique et packaging au Cameroun.</span>
+    </div>
+  </div>
+</footer>

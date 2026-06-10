@@ -1,0 +1,52 @@
+---
+const values = [
+  {
+    label: 'Bien-être',
+    text: 'Des produits et conseils pensés pour rendre la routine beauté plus simple, régulière et agréable.',
+    icon: '01',
+  },
+  {
+    label: 'Made in Cameroon',
+    text: 'Une présence locale, proche des clientes, des revendeurs et des réalités du marché camerounais.',
+    icon: '02',
+  },
+  {
+    label: 'Esthétique',
+    text: 'Une sélection soignée pour mettre en valeur la peau, le produit et la présentation en boutique.',
+    icon: '03',
+  },
+];
+---
+
+<section class="section" id="qui-sommes-nous" aria-labelledby="about-title">
+  <div class="container about-grid">
+    <div class="about-copy">
+      <span class="section-kicker">Qui sommes-nous ?</span>
+      <h2 class="section-title" id="about-title">
+        Une entreprise proche des routines beauté et des points de vente.
+      </h2>
+      <p class="section-copy">
+        EREC CAMEROUN réunit des gammes de soins, des produits complémentaires et
+        des solutions packaging pour accompagner les clientes comme les
+        partenaires professionnels.
+      </p>
+      <p class="section-copy">
+        La nouvelle boutique d’Etoudi devient le point d’accueil pour découvrir
+        les produits, poser des questions et préparer les rencontres à PROMOTE
+        2026.
+      </p>
+    </div>
+
+    <div class="value-grid" aria-label="Valeurs EREC">
+      {
+        values.map((value) => (
+          <article class="value-card">
+            <span class="value-icon">{value.icon}</span>
+            <h3>{value.label}</h3>
+            <p>{value.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
