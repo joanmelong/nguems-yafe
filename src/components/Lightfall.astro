@@ -1,0 +1,212 @@
+---
+interface Props {
+  colors?: string[];
+  backgroundColor?: string;
+  speed?: number;
+  streakCount?: number;
+  streakWidth?: number;
+  streakLength?: number;
+  glow?: number;
+  density?: number;
+  twinkle?: number;
+  zoom?: number;
+  backgroundGlow?: number;
+  opacity?: number;
+  mouseInteraction?: boolean;
+  mouseStrength?: number;
+  mouseRadius?: number;
+  color1?: string;
+  color2?: string;
+  color3?: string;
+}
+
+const {
+  colors = ['#FBCE4D', '#01A101', '#FFFFFF'],
+  backgroundColor = '#031507',
+  speed = 0.5,
+  streakCount = 18,
+  streakWidth = 1,
+  streakLength = 1,
+  glow = 1,
+  density = 0.6,
+  twinkle = 1,
+  zoom = 3,
+  backgroundGlow = 0.5,
+  opacity = 1,
+  mouseInteraction = true,
+  mouseStrength = 0.5,
+  mouseRadius = 1,
+  color1,
+  color2,
+  color3,
+} = Astro.props;
+
+const palette = [color1, color2, color3].filter(Boolean);
+const config = {
+  colors: palette.length > 0 ? palette : colors,
+  backgroundColor,
+  speed,
+  streakCount,
+  streakWidth,
+  streakLength,
+  glow,
+  density,
+  twinkle,
+  zoom,
+  backgroundGlow,
+  opacity,
+  mouseInteraction,
+  mouseStrength,
+  mouseRadius,
+};
+---
+
+<div class="lightfall" data-lightfall data-config={JSON.stringify(config)} aria-hidden="true">
+  <canvas></canvas>
+</div>
+
+<script>
+  const canvases = document.querySelectorAll('[data-lightfall]:not([data-ready])');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  canvases.forEach((root) => {
+    root.setAttribute('data-ready', 'true');
+
+    const canvas = root.querySelector('canvas');
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const config = JSON.parse(root.getAttribute('data-config') || '{}');
+    const colors = config.colors || ['#FBCE4D', '#01A101', '#FFFFFF'];
+    const pointer = { x: 0, y: 0, active: false };
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let streaks = [];
+    let raf = 0;
+
+    const random = (min, max) => min + Math.random() * (max - min);
+
+    const makeStreak = () => ({
+      x: random(-0.2, 1.2),
+      y: random(-0.4, 1.1),
+      speed: random(0.45, 1.35) * Number(config.speed || 0.5),
+      length: random(90, 230) * Number(config.streakLength || 1),
+      width: random(0.7, 1.8) * Number(config.streakWidth || 1),
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: random(0.2, 0.85) * Number(config.opacity || 1),
+      phase: random(0, Math.PI * 2),
+    });
+
+    const resize = () => {
+      const rect = root.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const count = Math.max(
+        6,
+        Math.floor((Number(config.streakCount || 18) * Number(config.density || 0.6) * width) / 900)
+      );
+      streaks = Array.from({ length: count }, makeStreak);
+    };
+
+    const drawBackground = () => {
+      const gradient = ctx.createRadialGradient(
+        width * 0.62,
+        height * 0.2,
+        0,
+        width * 0.62,
+        height * 0.2,
+        Math.max(width, height) * 0.78
+      );
+      gradient.addColorStop(0, `rgba(251, 206, 77, ${0.16 * Number(config.backgroundGlow || 0.5)})`);
+      gradient.addColorStop(0.35, `rgba(1, 161, 1, ${0.28 * Number(config.backgroundGlow || 0.5)})`);
+      gradient.addColorStop(1, config.backgroundColor || '#031507');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+    };
+
+    const render = (time) => {
+      drawBackground();
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+
+      const zoom = Number(config.zoom || 3);
+      const mouseRadius = Number(config.mouseRadius || 1) * 180;
+
+      streaks.forEach((streak) => {
+        const influence =
+          config.mouseInteraction && pointer.active
+            ? Math.max(0, 1 - Math.hypot(pointer.x - streak.x * width, pointer.y - streak.y * height) / mouseRadius)
+            : 0;
+
+        streak.y += 0.0018 * streak.speed * zoom;
+        streak.x += 0.00055 * streak.speed * zoom + influence * 0.001 * Number(config.mouseStrength || 0.5);
+
+        if (streak.y > 1.25 || streak.x > 1.25) {
+          Object.assign(streak, makeStreak(), { y: random(-0.35, -0.05) });
+        }
+
+        const x = streak.x * width;
+        const y = streak.y * height;
+        const len = streak.length;
+        const shimmer = 0.72 + Math.sin(time * 0.003 + streak.phase) * 0.18 * Number(config.twinkle || 1);
+        const alpha = Math.min(1, streak.alpha * shimmer + influence * 0.22);
+
+        const lineGradient = ctx.createLinearGradient(x, y, x + len * 0.28, y + len);
+        lineGradient.addColorStop(0, 'rgba(255,255,255,0)');
+        lineGradient.addColorStop(0.38, streak.color);
+        lineGradient.addColorStop(1, 'rgba(255,255,255,0)');
+
+        ctx.strokeStyle = lineGradient;
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = streak.width;
+        ctx.shadowBlur = 18 * Number(config.glow || 1);
+        ctx.shadowColor = streak.color;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + len * 0.28, y + len);
+        ctx.stroke();
+      });
+
+      ctx.restore();
+      raf = requestAnimationFrame(render);
+    };
+
+    const onPointerMove = (event) => {
+      const rect = root.getBoundingClientRect();
+      pointer.x = event.clientX - rect.left;
+      pointer.y = event.clientY - rect.top;
+      pointer.active = true;
+    };
+
+    const onPointerLeave = () => {
+      pointer.active = false;
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+    root.addEventListener('pointermove', onPointerMove);
+    root.addEventListener('pointerleave', onPointerLeave);
+
+    if (!reduceMotion.matches) {
+      raf = requestAnimationFrame(render);
+    } else {
+      drawBackground();
+    }
+
+    reduceMotion.addEventListener?.('change', () => {
+      cancelAnimationFrame(raf);
+      if (!reduceMotion.matches) raf = requestAnimationFrame(render);
+      else drawBackground();
+    });
+  });
+</script>

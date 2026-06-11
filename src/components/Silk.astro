@@ -1,0 +1,236 @@
+---
+interface Props {
+  speed?: number;
+  scale?: number;
+  color?: string;
+  noiseIntensity?: number;
+  rotation?: number;
+}
+
+const {
+  speed = 5,
+  scale = 1,
+  color = '#01A101',
+  noiseIntensity = 1.5,
+  rotation = 0,
+} = Astro.props;
+
+const config = {
+  speed,
+  scale,
+  color,
+  noiseIntensity,
+  rotation,
+};
+---
+
+<div class="silk" data-silk data-config={JSON.stringify(config)} aria-hidden="true">
+  <canvas></canvas>
+</div>
+
+<script>
+  const roots = document.querySelectorAll('[data-silk]:not([data-ready])');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  roots.forEach((root) => {
+    root.setAttribute('data-ready', 'true');
+    const canvas = root.querySelector('canvas');
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const config = JSON.parse(root.getAttribute('data-config') || '{}');
+    const color = config.color || '#01A101';
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let raf = 0;
+    let noisePattern = null;
+
+    const hexToRgb = (hex) => {
+      const normalized = hex.replace('#', '');
+      const value = Number.parseInt(
+        normalized.length === 3
+          ? normalized.split('').map((char) => char + char).join('')
+          : normalized,
+        16
+      );
+      return {
+        r: (value >> 16) & 255,
+        g: (value >> 8) & 255,
+        b: value & 255,
+      };
+    };
+
+    const rgb = hexToRgb(color);
+
+    const mix = (channel, target, amount) => Math.round(channel + (target - channel) * amount);
+    const rgba = (source, alpha) => `rgba(${source.r}, ${source.g}, ${source.b}, ${alpha})`;
+    const bright = {
+      r: mix(rgb.r, 255, 0.28),
+      g: mix(rgb.g, 255, 0.28),
+      b: mix(rgb.b, 255, 0.28),
+    };
+    const deep = {
+      r: Math.round(rgb.r * 0.08),
+      g: Math.round(rgb.g * 0.08),
+      b: Math.round(rgb.b * 0.08),
+    };
+
+    const makeNoisePattern = () => {
+      const noiseCanvas = document.createElement('canvas');
+      const size = 180;
+      noiseCanvas.width = size;
+      noiseCanvas.height = size;
+      const noiseCtx = noiseCanvas.getContext('2d');
+      if (!noiseCtx) return null;
+
+      const image = noiseCtx.createImageData(size, size);
+      for (let index = 0; index < image.data.length; index += 4) {
+        const value = 95 + Math.random() * 160;
+        image.data[index] = value;
+        image.data[index + 1] = value;
+        image.data[index + 2] = value;
+        image.data[index + 3] = 42 + Math.random() * 58;
+      }
+      noiseCtx.putImageData(image, 0, 0);
+
+      return ctx.createPattern(noiseCanvas, 'repeat');
+    };
+
+    const resize = () => {
+      const rect = root.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      noisePattern = makeNoisePattern();
+    };
+
+    const draw = (time = 0) => {
+      ctx.clearRect(0, 0, width, height);
+
+      const speed = Number(config.speed || 5) * 0.00024;
+      const scale = Number(config.scale || 1);
+      const intensity = Number(config.noiseIntensity || 1.5);
+      const phase = time * speed;
+      const diagonal = Math.max(width, height) * 1.8;
+
+      const base = ctx.createLinearGradient(0, 0, width, height);
+      base.addColorStop(0, rgba(deep, 0.98));
+      base.addColorStop(0.45, 'rgba(0, 0, 0, 0.94)');
+      base.addColorStop(1, rgba(deep, 0.88));
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.save();
+      ctx.translate(width / 2, height / 2);
+      ctx.rotate(((Number(config.rotation || 0) - 13) * Math.PI) / 180);
+      ctx.translate(-width / 2, -height / 2);
+
+      const bandCount = Math.max(5, Math.round(7 * scale));
+      const spacing = diagonal / (bandCount - 1);
+
+      for (let band = -1; band <= bandCount + 1; band += 1) {
+        const baseY = band * spacing - spacing;
+        const waveA = 42 * intensity;
+        const waveB = 24 * intensity;
+        const thickness = spacing * (0.58 + 0.08 * Math.sin(phase + band));
+
+        const makePath = (offset) => {
+          ctx.beginPath();
+          for (let x = -diagonal * 0.25; x <= diagonal; x += 34) {
+            const y =
+              baseY +
+              offset +
+              Math.sin(x * 0.0058 + phase + band * 0.8) * waveA +
+              Math.sin(x * 0.012 + phase * 1.7 + band * 1.6) * waveB;
+            if (x === -diagonal * 0.25) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+        };
+
+        ctx.save();
+        ctx.filter = 'blur(22px)';
+        ctx.globalCompositeOperation = 'screen';
+        makePath(-thickness * 0.48);
+        for (let x = diagonal; x >= -diagonal * 0.25; x -= 34) {
+          const y =
+            baseY +
+            thickness * 0.48 +
+            Math.sin(x * 0.0058 + phase + band * 0.8) * waveA +
+            Math.sin(x * 0.012 + phase * 1.7 + band * 1.6) * waveB;
+          ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+
+        const fill = ctx.createLinearGradient(0, baseY - thickness, width, baseY + thickness);
+        fill.addColorStop(0, rgba(bright, 0.18));
+        fill.addColorStop(0.32, rgba(rgb, 0.52));
+        fill.addColorStop(0.58, rgba(bright, 0.7));
+        fill.addColorStop(0.84, rgba(rgb, 0.36));
+        fill.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.filter = 'blur(10px)';
+        ctx.globalCompositeOperation = 'screen';
+        makePath(-thickness * 0.08);
+        ctx.lineWidth = Math.max(18, thickness * 0.18);
+        ctx.strokeStyle = rgba(bright, 0.28);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.filter = 'blur(18px)';
+        ctx.globalCompositeOperation = 'multiply';
+        makePath(thickness * 0.58);
+        ctx.lineWidth = Math.max(36, thickness * 0.3);
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.62)';
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.restore();
+
+      if (noisePattern) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.globalAlpha = Math.min(0.16, 0.055 + intensity * 0.035);
+        ctx.translate((phase * 800) % 180, (phase * 430) % 180);
+        ctx.fillStyle = noisePattern;
+        ctx.fillRect(-180, -180, width + 360, height + 360);
+        ctx.restore();
+      }
+
+      raf = requestAnimationFrame(draw);
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    if (reduceMotion.matches) {
+      draw(0);
+      cancelAnimationFrame(raf);
+    } else {
+      raf = requestAnimationFrame(draw);
+    }
+
+    reduceMotion.addEventListener?.('change', () => {
+      cancelAnimationFrame(raf);
+      if (reduceMotion.matches) {
+        draw(0);
+        cancelAnimationFrame(raf);
+      } else {
+        raf = requestAnimationFrame(draw);
+      }
+    });
+  });
+</script>

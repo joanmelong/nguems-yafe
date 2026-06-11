@@ -1,0 +1,94 @@
+---
+import { Image } from 'astro:assets';
+import { products } from '../data/site';
+import ScrollStack from './ScrollStack.astro';
+import Silk from './Silk.astro';
+import TextType from './TextType.astro';
+
+const values = [
+  {
+    label: 'Bien-être',
+    text: 'Des produits et conseils pensés pour rendre la routine beauté plus simple, régulière et agréable.',
+    icon: '01',
+    image: undefined,
+  },
+  {
+    label: 'Made in Cameroon',
+    text: 'Une présence locale, proche des clientes, des revendeurs et des réalités du marché camerounais.',
+    icon: '02',
+    image: undefined,
+  },
+  {
+    label: 'Esthétique',
+    text: 'Une sélection soignée pour mettre en valeur la peau, le produit et la présentation en boutique.',
+    icon: '03',
+    image: undefined,
+  },
+  {
+    label: 'Formations EREC',
+    text: 'Un institut de beauté qui forme en esthétique, en cosmétique et en coiffure avec une approche pratique.',
+    icon: '04',
+    image: products.find((product) => product.id === 'formation-esthetique')?.image || products[0].image,
+  },
+];
+---
+
+<section class="section" id="qui-sommes-nous" aria-labelledby="about-title">
+  <div class="container about-grid">
+    <div class="about-copy">
+      <span class="section-kicker">Qui sommes-nous ?</span>
+      <h2 class="section-title" id="about-title">
+        <TextType
+          text={['Une entreprise proche des routines beauté et des points de vente.']}
+          typingSpeed={62}
+          pauseDuration={3000}
+          showCursor
+          cursorCharacter="_"
+          deletingSpeed={42}
+          variableSpeedEnabled={false}
+          cursorBlinkDuration={0.55}
+        />
+      </h2>
+      <p class="section-copy">
+        EREC CAMEROUN réunit des gammes de soins, des produits complémentaires et
+        des solutions packaging pour accompagner les clientes comme les
+        partenaires professionnels.
+      </p>
+      <p class="section-copy">
+        La nouvelle boutique d’Etoudi devient le point d’accueil pour découvrir
+        les produits, poser des questions et préparer les rencontres à PROMOTE
+        2026.
+      </p>
+    </div>
+
+    <div class="about-stack-panel">
+      <Silk speed={5} scale={1} color="#01A101" noiseIntensity={1.5} rotation={0} />
+      <ScrollStack label="Valeurs et formations EREC">
+        {
+          values.map((value) => (
+            <article class:list={['value-card', 'scroll-stack-item', value.image && 'value-card-featured']}>
+              <div>
+                <span class="value-icon">{value.icon}</span>
+                <h3>{value.label}</h3>
+                <p>{value.text}</p>
+              </div>
+              {
+                value.image && (
+                  <div class="value-card-media">
+                    <Image
+                      src={value.image}
+                      alt="Formation institut EREC"
+                      widths={[260, 420, 640]}
+                      sizes="(max-width: 700px) 70vw, 260px"
+                      loading="lazy"
+                    />
+                  </div>
+                )
+              }
+            </article>
+          ))
+        }
+      </ScrollStack>
+    </div>
+  </div>
+</section>

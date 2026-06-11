@@ -1,0 +1,143 @@
+---
+interface Props {
+  text?: string[];
+  texts?: string[];
+  typingSpeed?: number;
+  pauseDuration?: number;
+  showCursor?: boolean;
+  cursorCharacter?: string;
+  deletingSpeed?: number;
+  variableSpeedEnabled?: boolean;
+  variableSpeedMin?: number;
+  variableSpeedMax?: number;
+  cursorBlinkDuration?: number;
+  startDelay?: number;
+  class?: string;
+}
+
+const {
+  text = [],
+  texts = [],
+  typingSpeed = 75,
+  pauseDuration = 1500,
+  showCursor = true,
+  cursorCharacter = '_',
+  deletingSpeed = 50,
+  variableSpeedEnabled = false,
+  variableSpeedMin = 60,
+  variableSpeedMax = 120,
+  cursorBlinkDuration = 0.5,
+  startDelay = 0,
+  class: className = '',
+} = Astro.props;
+
+const items = texts.length > 0 ? texts : text;
+const fallback = items[0] || '';
+const config = {
+  items,
+  typingSpeed,
+  pauseDuration,
+  showCursor,
+  cursorCharacter,
+  deletingSpeed,
+  variableSpeedEnabled,
+  variableSpeedMin,
+  variableSpeedMax,
+  cursorBlinkDuration,
+  startDelay,
+};
+---
+
+<span class:list={['text-type', className]} data-text-type data-config={JSON.stringify(config)}>
+  <span data-text-type-value>{fallback}</span>
+  {
+    showCursor && (
+      <span
+        class="text-type-cursor"
+        style={`--cursor-blink-duration:${cursorBlinkDuration}s`}
+        aria-hidden="true"
+      >
+        {cursorCharacter}
+      </span>
+    )
+  }
+</span>
+
+<script>
+  const nodes = document.querySelectorAll('[data-text-type]:not([data-ready])');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  nodes.forEach((node) => {
+    node.setAttribute('data-ready', 'true');
+    const value = node.querySelector('[data-text-type-value]');
+    if (!value) return;
+
+    const config = JSON.parse(node.getAttribute('data-config') || '{}');
+    const items = Array.isArray(config.items) && config.items.length > 0 ? config.items : [value.textContent || ''];
+
+    if (reduceMotion.matches || items.length === 0) {
+      value.textContent = items[0] || '';
+      return;
+    }
+
+    let itemIndex = 0;
+    let charIndex = String(value.textContent || '').length;
+    let deleting = false;
+    let timeout = 0;
+
+    const nextDelay = (base) => {
+      if (!config.variableSpeedEnabled) return base;
+      const min = Number(config.variableSpeedMin || 60);
+      const max = Number(config.variableSpeedMax || 120);
+      return min + Math.random() * (max - min);
+    };
+
+    const tick = () => {
+      const current = items[itemIndex];
+
+      if (!deleting) {
+        charIndex += 1;
+        value.textContent = current.slice(0, charIndex);
+
+        if (charIndex >= current.length) {
+          if (items.length === 1) {
+            timeout = window.setTimeout(() => {
+              charIndex = 0;
+              value.textContent = '';
+              tick();
+            }, Number(config.pauseDuration || 1500));
+            return;
+          }
+
+          deleting = true;
+          timeout = window.setTimeout(tick, Number(config.pauseDuration || 1500));
+          return;
+        }
+
+        timeout = window.setTimeout(tick, nextDelay(Number(config.typingSpeed || 75)));
+        return;
+      }
+
+      charIndex -= 1;
+      value.textContent = current.slice(0, Math.max(0, charIndex));
+
+      if (charIndex <= 0) {
+        deleting = false;
+        itemIndex = (itemIndex + 1) % items.length;
+      }
+
+      timeout = window.setTimeout(tick, Number(config.deletingSpeed || 50));
+    };
+
+    timeout = window.setTimeout(() => {
+      charIndex = 0;
+      value.textContent = '';
+      tick();
+    }, Number(config.startDelay || 0));
+
+    reduceMotion.addEventListener?.('change', () => {
+      window.clearTimeout(timeout);
+      value.textContent = items[0] || '';
+    });
+  });
+</script>

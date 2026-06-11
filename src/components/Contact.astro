@@ -1,0 +1,104 @@
+---
+import { contact, products, salesPointCategories, salesPoints } from '../data/site';
+---
+
+<section class="section" id="contact" aria-labelledby="contact-title">
+  <div class="container contact-grid">
+    <div>
+      <span class="section-kicker">Contact</span>
+      <h2 class="section-title" id="contact-title">Points de vente et demandes produits.</h2>
+      <p class="section-copy">
+        Passez en boutique, retrouvez EREC à PROMOTE 2026 ou envoyez une demande
+        rapide sur WhatsApp.
+      </p>
+
+      <div class="sales-groups" aria-label="Points de vente">
+        {
+          salesPointCategories.map((category) => {
+            const categoryPoints = salesPoints.filter((point) => point.categories.includes(category.id));
+
+            return (
+              <section class="sales-group" aria-labelledby={`sales-${category.id}`}>
+                <div class="sales-group-head">
+                  <h3 id={`sales-${category.id}`}>{category.label}</h3>
+                  <p>{category.summary}</p>
+                </div>
+                <div class="sales-list">
+                  {categoryPoints.map((point) => (
+                    <article class="sales-card">
+                      <h4>{point.name}</h4>
+                      <p><strong>{point.address}</strong></p>
+                      <p>{point.details}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            );
+          })
+        }
+      </div>
+    </div>
+
+    <div class="contact-panel">
+      <form class="contact-form" data-contact-form>
+        <div class="form-row">
+          <label for="contact-name">Nom</label>
+          <input
+            class="contact-field"
+            id="contact-name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            required
+            placeholder="Votre nom"
+          />
+        </div>
+
+        <div class="form-row">
+          <label for="contact-product">Produit</label>
+          <select class="contact-select" id="contact-product" name="product" required>
+            <option value="">Choisir un produit</option>
+            {products.map((product) => <option value={product.name}>{product.name}</option>)}
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="contact-message">Message facultatif</label>
+          <textarea
+            class="contact-textarea"
+            id="contact-message"
+            name="message"
+            placeholder="Votre question, quantité souhaitée ou point de retrait"
+          ></textarea>
+        </div>
+
+        <button class="button button-primary" type="submit">Envoyer sur WhatsApp</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script define:vars={{ phone: contact.phone }}>
+  const form = document.querySelector('[data-contact-form]');
+
+  if (form instanceof HTMLFormElement) {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const name = String(data.get('name') || '').trim();
+      const product = String(data.get('product') || '').trim();
+      const message = String(data.get('message') || '').trim();
+
+      const lines = [
+        'Bonjour EREC CAMEROUN,',
+        name ? `Je suis ${name}.` : '',
+        product ? `Je souhaite des informations sur : ${product}.` : '',
+        message ? `Message : ${message}` : '',
+      ].filter(Boolean);
+
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+  }
+</script>

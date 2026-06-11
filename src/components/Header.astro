@@ -1,0 +1,48 @@
+---
+import { contact, navItems, siteMeta } from '../data/site';
+
+const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
+  contact.whatsappMessage
+)}`;
+---
+
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a class="brand-mark" href="#top" aria-label="Accueil EREC CAMEROUN">
+      <span>{siteMeta.brand}</span>
+    </a>
+
+    <input class="nav-toggle" type="checkbox" id="nav-toggle" aria-label="Ouvrir le menu" />
+    <nav class="site-nav" aria-label="Navigation principale">
+      <ul class="site-nav-list">
+        {
+          navItems.map((item) => (
+            <li class:list={['nav-item', item.children && 'has-submenu']}>
+              <a class="nav-link" href={item.href}>
+                {item.label}
+              </a>
+              {item.children && (
+                <div class="submenu" aria-label={`Sous-menu ${item.label}`}>
+                  {item.children.map((child) => (
+                    <a href={child.href}>{child.label}</a>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <a class="button button-dark" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+        Contact
+      </a>
+    </div>
+
+    <label class="nav-toggle-button" for="nav-toggle">
+      <span class="sr-only">Ouvrir le menu</span>
+      <span class="menu-lines" aria-hidden="true"></span>
+    </label>
+  </div>
+</header>

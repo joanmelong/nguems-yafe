@@ -1,0 +1,211 @@
+---
+interface Props {
+  label?: string;
+  itemDistance?: number;
+  itemScale?: number;
+  itemStackDistance?: number;
+  stackPosition?: string;
+  scaleEndPosition?: string;
+  baseScale?: number;
+  rotationAmount?: number;
+  blurAmount?: number;
+}
+
+const {
+  label = 'Valeurs et offres EREC',
+  itemDistance = 70,
+  itemScale = 0.035,
+  itemStackDistance = 24,
+  stackPosition = '18%',
+  scaleEndPosition = '8%',
+  baseScale = 0.88,
+  rotationAmount = 0,
+  blurAmount = 0,
+} = Astro.props;
+
+const config = {
+  itemDistance,
+  itemScale,
+  itemStackDistance,
+  stackPosition,
+  scaleEndPosition,
+  baseScale,
+  rotationAmount,
+  blurAmount,
+};
+---
+
+<div
+  class="scroll-stack-scroller"
+  aria-label={label}
+  data-scroll-stack
+  data-config={JSON.stringify(config)}
+  tabindex="0"
+>
+  <div class="scroll-stack-inner">
+    <slot />
+    <div class="scroll-stack-end" aria-hidden="true"></div>
+  </div>
+</div>
+
+<script>
+  const stacks = document.querySelectorAll('[data-scroll-stack]:not([data-ready])');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  stacks.forEach((scroller) => {
+    if (!(scroller instanceof HTMLElement)) return;
+    scroller.setAttribute('data-ready', 'true');
+
+    const inner = scroller.querySelector('.scroll-stack-inner');
+    if (!(inner instanceof HTMLElement)) return;
+
+    const config = JSON.parse(scroller.getAttribute('data-config') || '{}');
+    const cards = Array.from(inner.children).filter(
+      (child) => child instanceof HTMLElement && !child.classList.contains('scroll-stack-end')
+    );
+    const endElement = inner.querySelector('.scroll-stack-end');
+    if (!(endElement instanceof HTMLElement) || cards.length === 0) return;
+
+    let raf = 0;
+    let isUpdating = false;
+    const lastTransforms = new Map();
+
+    const itemDistance = Number(config.itemDistance || 70);
+    const itemScale = Number(config.itemScale || 0.035);
+    const itemStackDistance = Number(config.itemStackDistance || 24);
+    const baseScale = Number(config.baseScale || 0.88);
+    const rotationAmount = Number(config.rotationAmount || 0);
+    const blurAmount = Number(config.blurAmount || 0);
+
+    const parsePosition = (value, containerHeight) => {
+      if (typeof value === 'string' && value.includes('%')) {
+        return (Number.parseFloat(value) / 100) * containerHeight;
+      }
+      return Number.parseFloat(value) || 0;
+    };
+
+    const progress = (scrollTop, start, end) => {
+      if (scrollTop < start) return 0;
+      if (scrollTop > end) return 1;
+      return (scrollTop - start) / Math.max(1, end - start);
+    };
+
+    const cardTop = (card) => card.offsetTop;
+
+    const update = () => {
+      if (isUpdating) return;
+      isUpdating = true;
+
+      const scrollTop = scroller.scrollTop;
+      const containerHeight = scroller.clientHeight;
+      const stackPositionPx = parsePosition(config.stackPosition || '18%', containerHeight);
+      const scaleEndPositionPx = parsePosition(config.scaleEndPosition || '8%', containerHeight);
+      const endTop = endElement.offsetTop;
+
+      let topCardIndex = 0;
+      cards.forEach((card, index) => {
+        const triggerStart = cardTop(card) - stackPositionPx - itemStackDistance * index;
+        if (scrollTop >= triggerStart) topCardIndex = index;
+      });
+
+      cards.forEach((card, index) => {
+        const top = cardTop(card);
+        const triggerStart = top - stackPositionPx - itemStackDistance * index;
+        const triggerEnd = top - scaleEndPositionPx;
+        const pinStart = triggerStart;
+        const pinEnd = endTop - containerHeight / 2;
+        const scaleProgress = progress(scrollTop, triggerStart, triggerEnd);
+        const targetScale = baseScale + index * itemScale;
+        const scale = 1 - scaleProgress * (1 - targetScale);
+        const rotation = rotationAmount ? index * rotationAmount * scaleProgress : 0;
+        let blur = 0;
+        let translateY = 0;
+
+        if (blurAmount && index < topCardIndex) {
+          blur = Math.max(0, (topCardIndex - index) * blurAmount);
+        }
+
+        if (scrollTop >= pinStart && scrollTop <= pinEnd) {
+          translateY = scrollTop - top + stackPositionPx + itemStackDistance * index;
+        } else if (scrollTop > pinEnd) {
+          translateY = pinEnd - top + stackPositionPx + itemStackDistance * index;
+        }
+
+        const nextTransform = {
+          translateY: Math.round(translateY * 100) / 100,
+          scale: Math.round(scale * 1000) / 1000,
+          rotation: Math.round(rotation * 100) / 100,
+          blur: Math.round(blur * 100) / 100,
+        };
+
+        const previous = lastTransforms.get(index);
+        const changed =
+          !previous ||
+          Math.abs(previous.translateY - nextTransform.translateY) > 0.1 ||
+          Math.abs(previous.scale - nextTransform.scale) > 0.001 ||
+          Math.abs(previous.rotation - nextTransform.rotation) > 0.1 ||
+          Math.abs(previous.blur - nextTransform.blur) > 0.1;
+
+        if (changed) {
+          card.style.transform = `translate3d(0, ${nextTransform.translateY}px, 0) scale(${nextTransform.scale}) rotate(${nextTransform.rotation}deg)`;
+          card.style.filter = nextTransform.blur > 0 ? `blur(${nextTransform.blur}px)` : '';
+          lastTransforms.set(index, nextTransform);
+        }
+      });
+
+      isUpdating = false;
+    };
+
+    const requestUpdate = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        update();
+      });
+    };
+
+    const atScrollStart = () => scroller.scrollTop <= 1;
+    const atScrollEnd = () => scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+
+    cards.forEach((card, index) => {
+      card.classList.add('scroll-stack-card');
+      if (index < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
+      card.style.willChange = 'transform, filter';
+      card.style.transformOrigin = 'top center';
+      card.style.backfaceVisibility = 'hidden';
+      card.style.perspective = '1000px';
+    });
+
+    if (reduceMotion.matches) {
+      scroller.setAttribute('data-reduced-motion', 'true');
+      return;
+    }
+
+    scroller.addEventListener('wheel', (event) => {
+      const leavingTop = event.deltaY < 0 && atScrollStart();
+      const leavingBottom = event.deltaY > 0 && atScrollEnd();
+
+      if (leavingTop || leavingBottom) {
+        return;
+      }
+
+      requestUpdate();
+    }, { passive: false });
+    scroller.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    update();
+
+    reduceMotion.addEventListener?.('change', () => {
+      if (reduceMotion.matches) {
+        scroller.setAttribute('data-reduced-motion', 'true');
+        cards.forEach((card) => {
+          card.style.transform = '';
+          card.style.filter = '';
+        });
+      } else {
+        scroller.removeAttribute('data-reduced-motion');
+        requestUpdate();
+      }
+    });
+  });
+</script>

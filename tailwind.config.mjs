@@ -4,18 +4,15 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        playfair: ['"Playfair Display"', 'serif'],
-        inter: ['Inter', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
       },
       colors: {
-        nguems: {
+        erec: {
           primary: '#01A101',
-          secondary: '#FBCE4D',
-          tertiary: '#FFFFFF',
-          gold: '#FBCE4D',
-          cream: '#FFFFFF',
-          dark: '#01A101',
-          brown: '#01A101',
+          secondary: '#FCFF55',
+          ink: '#070707',
+          slate: '#343434',
+          white: '#FFFFFF',
         },
       },
       animation: {
