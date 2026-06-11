@@ -1,5 +1,36 @@
 ---
-import { contact, products, salesPointCategories, salesPoints } from '../data/site';
+import {
+  contact,
+  products,
+  salesDistributionNote,
+  salesPointCategories,
+  salesPoints,
+} from '../data/site';
+
+const normalizePhoneForLink = (phone: string) => {
+  const cleaned = phone.trim().replace(/[^\d+]/g, '');
+  if (cleaned.startsWith('+')) return cleaned;
+  if (cleaned.startsWith('237') || cleaned.startsWith('225')) return `+${cleaned}`;
+  if (cleaned.length === 9 && cleaned.startsWith('6')) return `+237${cleaned}`;
+  return cleaned;
+};
+
+const phoneForWhatsApp = (phone: string) => normalizePhoneForLink(phone).replace(/[^\d]/g, '');
+
+const groupedSalesPoints = salesPointCategories.map((category) => {
+  const points = salesPoints.filter((point) => point.categories.includes(category.id));
+  const cities = new Map<string, typeof points>();
+
+  points.forEach((point) => {
+    const key = point.country === 'Cameroun' ? point.city : point.country;
+    cities.set(key, [...(cities.get(key) || []), point]);
+  });
+
+  return {
+    ...category,
+    cities: Array.from(cities, ([city, cityPoints]) => ({ city, points: cityPoints })),
+  };
+});
 ---
 
 <section class="section" id="contact" aria-labelledby="contact-title">
@@ -14,29 +45,58 @@ import { contact, products, salesPointCategories, salesPoints } from '../data/si
 
       <div class="sales-groups" aria-label="Points de vente">
         {
-          salesPointCategories.map((category) => {
-            const categoryPoints = salesPoints.filter((point) => point.categories.includes(category.id));
-
-            return (
-              <section class="sales-group" aria-labelledby={`sales-${category.id}`}>
-                <div class="sales-group-head">
-                  <h3 id={`sales-${category.id}`}>{category.label}</h3>
-                  <p>{category.summary}</p>
-                </div>
-                <div class="sales-list">
-                  {categoryPoints.map((point) => (
-                    <article class="sales-card">
-                      <h4>{point.name}</h4>
-                      <p><strong>{point.address}</strong></p>
-                      <p>{point.details}</p>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            );
-          })
+          groupedSalesPoints.map((category) => (
+            <section class="sales-group" aria-labelledby={`sales-${category.id}`}>
+              <div class="sales-group-head">
+                <h3 id={`sales-${category.id}`}>{category.label}</h3>
+                <p>{category.summary}</p>
+              </div>
+              <div class="sales-city-list">
+                {category.cities.map(({ city, points }) => (
+                  <section class="sales-city" aria-label={`Points de vente ${city}`}>
+                    <h4>{city}</h4>
+                    <div class="sales-list">
+                      {points.map((point) => (
+                        <article class="sales-card">
+                          <div>
+                            <h5>{point.name}</h5>
+                            <p><strong>{point.address}</strong></p>
+                            <p>{point.details}</p>
+                          </div>
+                          {point.phones.length > 0 && (
+                            <div class="sales-phones" aria-label={`Contacts ${point.name}`}>
+                              {point.phones.map((phone) => {
+                                const linkPhone = normalizePhoneForLink(phone);
+                                const whatsappPhone = phoneForWhatsApp(phone);
+                                return (
+                                  <span class="sales-phone">
+                                    <a href={`tel:${linkPhone}`} aria-label={`Appeler ${phone}`}>
+                                      {phone}
+                                    </a>
+                                    <a
+                                      href={`https://wa.me/${whatsappPhone}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      aria-label={`Contacter ${phone} sur WhatsApp`}
+                                    >
+                                      WhatsApp
+                                    </a>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </section>
+          ))
         }
       </div>
+      <p class="sales-distribution-note">{salesDistributionNote}</p>
     </div>
 
     <div class="contact-panel">

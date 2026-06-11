@@ -395,16 +395,20 @@ textarea {
 
 .hero-product-stack {
   position: relative;
-  min-height: 430px;
+  display: flex;
+  min-height: min(560px, 62vh);
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-product {
-  position: absolute;
-  border-radius: 28px;
+  position: relative;
+  border-radius: 34px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 28px 86px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px);
 }
 
 .hero-product img {
@@ -413,19 +417,19 @@ textarea {
   object-fit: cover;
 }
 
-.hero-product-primary {
-  right: 2%;
-  bottom: 5%;
-  width: min(380px, 75%);
-  aspect-ratio: 1 / 0.8;
+.hero-product-main {
+  width: min(520px, 100%);
+  aspect-ratio: 0.82 / 1;
 }
 
-.hero-product-secondary {
-  right: 24%;
-  top: 0;
-  width: min(250px, 52%);
-  aspect-ratio: 1 / 0.86;
-  box-shadow: 0 20px 50px rgba(1, 161, 1, 0.22);
+.hero-product-main::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 26px;
+  pointer-events: none;
 }
 
 .news-band {
@@ -508,7 +512,7 @@ textarea {
   overscroll-behavior: auto;
   padding: 8px 8px 0;
   outline: none;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scrollbar-color: rgba(251, 206, 77, 0.55) rgba(255, 255, 255, 0.12);
   scrollbar-width: thin;
 }
@@ -775,7 +779,7 @@ textarea {
 
 .product-track {
   display: grid;
-  grid-auto-columns: minmax(270px, 320px);
+  grid-auto-columns: minmax(260px, 320px);
   grid-auto-flow: column;
   gap: 18px;
   overflow-x: auto;
@@ -1076,12 +1080,70 @@ textarea {
   gap: 14px;
 }
 
-.sales-card {
-  padding: 20px;
+.sales-city-list {
+  display: grid;
+  gap: 18px;
 }
 
-.sales-card h4 {
+.sales-city {
+  display: grid;
+  gap: 10px;
+}
+
+.sales-city h4 {
+  margin: 0;
+  color: var(--color-green-dark);
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sales-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.sales-card h5 {
   margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.18;
+}
+
+.sales-phones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sales-phone {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid rgba(1, 161, 1, 0.16);
+  border-radius: 999px;
+  background: rgba(1, 161, 1, 0.08);
+}
+
+.sales-phone a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  padding: 6px 10px;
+  color: var(--color-green-dark);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.sales-phone a + a {
+  background: var(--color-green);
+  color: var(--color-white);
+}
+
+.sales-distribution-note {
+  margin: 18px 0 0;
+  color: var(--color-slate);
+  font-weight: 800;
 }
 
 .contact-panel {
@@ -1377,7 +1439,7 @@ textarea {
   }
 
   .hero-product-stack {
-    min-height: 320px;
+    min-height: min(500px, 58vh);
   }
 
   .testimonials-grid {
@@ -1421,19 +1483,17 @@ textarea {
     gap: 30px;
   }
 
-  .hero-gallery {
-    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  .hero-product-stack {
+    min-height: min(420px, 58vh);
   }
 
-  .hero-product-primary {
-    right: 0;
-    width: 78%;
+  .hero-product-main {
+    width: min(100%, 420px);
+    aspect-ratio: 0.86 / 1;
   }
 
-  .hero-product-secondary {
-    left: 0;
-    right: auto;
-    width: 55%;
+  .hero-product-main img {
+    object-position: center top;
   }
 
   .about-stack-panel {
@@ -1486,6 +1546,10 @@ textarea {
   .product-grid,
   .product-card-list {
     grid-template-columns: 1fr;
+  }
+
+  .product-track {
+    grid-auto-columns: minmax(240px, 82vw);
   }
 
   .product-card-list .product-card-media {

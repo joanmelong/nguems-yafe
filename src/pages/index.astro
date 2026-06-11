@@ -3,35 +3,19 @@ import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import NewsBanner from '../components/NewsBanner.astro';
 import QuiSommesNous from '../components/QuiSommesNous.astro';
-import ProductExplorer from '../components/ProductExplorer';
+import ProductExplorer from '../components/ProductExplorer.astro';
 import Temoignages from '../components/Temoignages.astro';
 import PromoteLocation from '../components/PromoteLocation.astro';
 import Contact from '../components/Contact.astro';
 import Footer from '../components/Footer.astro';
 import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
 import Layout from '../layouts/Layout.astro';
-import { getImage } from 'astro:assets';
 import {
   contact,
   productRanges,
   products,
   siteMeta,
 } from '../data/site';
-
-const productExplorerProducts = await Promise.all(
-  products.map(async (product) => {
-    const optimizedImage = await getImage({
-      src: product.image,
-      width: 640,
-      format: 'webp',
-    });
-
-    return {
-      ...product,
-      image: optimizedImage.src,
-    };
-  })
-);
 ---
 
 <Layout title={siteMeta.title} description={siteMeta.description}>
@@ -41,9 +25,8 @@ const productExplorerProducts = await Promise.all(
     <NewsBanner />
     <QuiSommesNous />
     <ProductExplorer
-      client:visible
       ranges={productRanges}
-      products={productExplorerProducts}
+      products={products}
       whatsappPhone={contact.phone}
     />
     <Temoignages />

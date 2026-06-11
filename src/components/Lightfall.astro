@@ -68,6 +68,7 @@ const config = {
 <script>
   const canvases = document.querySelectorAll('[data-lightfall]:not([data-ready])');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const isMobile = window.matchMedia('(max-width: 700px)');
 
   canvases.forEach((root) => {
     root.setAttribute('data-ready', 'true');
@@ -86,6 +87,8 @@ const config = {
     let dpr = 1;
     let streaks = [];
     let raf = 0;
+    let active = false;
+    let visible = false;
 
     const random = (min, max) => min + Math.random() * (max - min);
 
@@ -102,7 +105,7 @@ const config = {
 
     const resize = () => {
       const rect = root.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, isMobile.matches ? 1.15 : 1.5);
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
       canvas.width = Math.floor(width * dpr);
@@ -111,11 +114,13 @@ const config = {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const count = Math.max(
+      const baseCount = Math.max(
         6,
         Math.floor((Number(config.streakCount || 18) * Number(config.density || 0.6) * width) / 900)
       );
+      const count = isMobile.matches ? Math.max(4, Math.floor(baseCount * 0.42)) : baseCount;
       streaks = Array.from({ length: count }, makeStreak);
+      if (!active) drawBackground();
     };
 
     const drawBackground = () => {
@@ -135,6 +140,11 @@ const config = {
     };
 
     const render = (time) => {
+      if (!active || reduceMotion.matches || document.hidden) {
+        raf = 0;
+        return;
+      }
+
       drawBackground();
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
@@ -194,19 +204,48 @@ const config = {
 
     resize();
     window.addEventListener('resize', resize);
-    root.addEventListener('pointermove', onPointerMove);
-    root.addEventListener('pointerleave', onPointerLeave);
-
-    if (!reduceMotion.matches) {
-      raf = requestAnimationFrame(render);
-    } else {
-      drawBackground();
+    if (config.mouseInteraction && !isMobile.matches) {
+      root.addEventListener('pointermove', onPointerMove);
+      root.addEventListener('pointerleave', onPointerLeave);
     }
 
+    const start = () => {
+      if (active || reduceMotion.matches || document.hidden || !visible) return;
+      active = true;
+      raf = requestAnimationFrame(render);
+    };
+
+    const stop = () => {
+      active = false;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      drawBackground();
+    };
+
+    const observer = 'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+          visible = entries.some((entry) => entry.isIntersecting);
+          if (visible) start();
+          else stop();
+        }, { threshold: 0.08 })
+      : null;
+
+    if (observer) observer.observe(root);
+    else {
+      visible = true;
+      start();
+    }
+
+    if (reduceMotion.matches) drawBackground();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else start();
+    });
+
     reduceMotion.addEventListener?.('change', () => {
-      cancelAnimationFrame(raf);
-      if (!reduceMotion.matches) raf = requestAnimationFrame(render);
-      else drawBackground();
+      stop();
+      if (!reduceMotion.matches) start();
     });
   });
 </script>

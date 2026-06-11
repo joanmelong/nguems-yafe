@@ -1,0 +1,383 @@
+---
+import { Image } from 'astro:assets';
+import {
+  categoryLabels,
+  type Product,
+  type ProductRange,
+  type ProductView,
+} from '../data/site';
+
+interface Props {
+  ranges: ProductRange[];
+  products: Product[];
+  whatsappPhone: string;
+}
+
+const { ranges, products, whatsappPhone } = Astro.props;
+
+const normalize = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const shortRangeLabel = (range: ProductRange) => {
+  if (range.id === 'nguems-cosmetics') return "NGUEM'S";
+  if (range.id === 'mavela') return 'MAVELA';
+  if (range.id === 'formations-erec') return 'Formations';
+  return 'Packaging';
+};
+
+const makeWhatsappHref = (product: Product) => {
+  const message = [
+    'Bonjour EREC CAMEROUN,',
+    `Je souhaite avoir des informations sur : ${product.name}.`,
+    `Gamme : ${product.range}.`,
+  ].join('\n');
+
+  return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
+};
+
+const viewOptions: Array<{ value: ProductView; label: string }> = [
+  { value: 'carousel', label: 'Carousel' },
+  { value: 'grid', label: 'Grille' },
+  { value: 'list', label: 'Liste' },
+];
+
+const productSearchText = (product: Product) =>
+  normalize(
+    [
+      product.name,
+      product.category,
+      categoryLabels[product.category],
+      product.shortDescription,
+      ...product.benefits,
+    ].join(' ')
+  );
+---
+
+<section
+  class="section products-section"
+  id="produits"
+  aria-labelledby="products-title"
+  data-product-explorer
+  data-view="carousel"
+>
+  <div class="container">
+    <div class="products-head">
+      <div>
+        <span class="section-kicker">Nos Produits</span>
+        <h2 class="section-title" id="products-title">
+          Quatre offres pour conseiller, vendre, former et présenter.
+        </h2>
+        <p class="section-copy">
+          Choisissez une gamme, recherchez un produit et adaptez l'affichage à votre navigation.
+        </p>
+      </div>
+
+      <div class="product-controls" aria-label="Filtres produits">
+        <input
+          class="product-search"
+          type="search"
+          placeholder="Rechercher par nom ou besoin"
+          aria-label="Rechercher un produit"
+          data-product-search
+        />
+
+        <div class="filter-row range-tabs" aria-label="Gammes">
+          {
+            ranges.map((range, index) => (
+              <button
+                class="chip"
+                type="button"
+                aria-pressed={index === 0 ? 'true' : 'false'}
+                data-range-button
+                data-range={range.id}
+              >
+                {shortRangeLabel(range)}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="view-row" aria-label="Mode d'affichage">
+          {
+            viewOptions.map((option) => (
+              <button
+                class="view-button view-button-icon"
+                type="button"
+                aria-pressed={option.value === 'carousel' ? 'true' : 'false'}
+                aria-label={`Vue ${option.label}`}
+                title={option.label}
+                data-view-button
+                data-view={option.value}
+              >
+                {option.value === 'carousel' && (
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M3 9v6M21 9v6"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                )}
+                {option.value === 'grid' && (
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                    />
+                  </svg>
+                )}
+                {option.value === 'list' && (
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-width="2.3"
+                    />
+                  </svg>
+                )}
+                <span class="sr-only">{option.label}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="product-ranges">
+      {
+        ranges.map((range) => {
+          const rangeProducts = products.filter((product) => product.range === range.id);
+
+          return (
+            <section
+              class="range-section"
+              id={`gamme-${range.id}`}
+              aria-labelledby={`title-${range.id}`}
+              data-range-section
+              data-range={range.id}
+            >
+              <div class="range-header">
+                <div>
+                  <h3 id={`title-${range.id}`}>{range.label}</h3>
+                  <p>{range.summary}</p>
+                </div>
+
+                <div class="carousel-actions" aria-label={`Navigation ${range.label}`} data-carousel-actions>
+                  <button
+                    class="icon-button"
+                    type="button"
+                    data-scroll-products="left"
+                    data-target={`track-${range.id}`}
+                    aria-label={`Voir les produits précédents de ${range.label}`}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M15 18l-6-6 6-6"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    class="icon-button"
+                    type="button"
+                    data-scroll-products="right"
+                    data-target={`track-${range.id}`}
+                    aria-label={`Voir les produits suivants de ${range.label}`}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M9 18l6-6-6-6"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="empty-state" data-empty-state hidden>
+                Aucun produit ne correspond à cette recherche.
+              </div>
+
+              <div class="product-collection product-track" id={`track-${range.id}`} data-product-collection>
+                {
+                  rangeProducts.map((product) => (
+                    <article class="product-card" data-product-card data-search={productSearchText(product)}>
+                      {product.badge && <span class="product-badge">{product.badge}</span>}
+                      <div class="product-card-media">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          widths={[240, 360, 520, 680]}
+                          sizes="(max-width: 700px) 78vw, (max-width: 1024px) 34vw, 280px"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div class="product-card-body">
+                        <div class="product-meta">
+                          <span>{shortRangeLabel(range)}</span>
+                          <span>{categoryLabels[product.category]}</span>
+                        </div>
+                        <h3>{product.name}</h3>
+                        <p>{product.shortDescription}</p>
+                        <ul class="product-benefits" aria-label={`Bienfaits de ${product.name}`}>
+                          {product.benefits.map((benefit) => <li>{benefit}</li>)}
+                        </ul>
+                        <a
+                          class="button button-dark"
+                          href={makeWhatsappHref(product)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Demander
+                        </a>
+                      </div>
+                    </article>
+                  ))
+                }
+              </div>
+            </section>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  const explorers = document.querySelectorAll('[data-product-explorer]:not([data-ready])');
+
+  const normalizeProductText = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+  explorers.forEach((root) => {
+    if (!(root instanceof HTMLElement)) return;
+    root.setAttribute('data-ready', 'true');
+    root.setAttribute('data-enhanced', 'true');
+
+    const search = root.querySelector('[data-product-search]');
+    const rangeButtons = Array.from(root.querySelectorAll('[data-range-button]'));
+    const viewButtons = Array.from(root.querySelectorAll('[data-view-button]'));
+    const sections = Array.from(root.querySelectorAll('[data-range-section]'));
+    let activeRange = rangeButtons[0]?.getAttribute('data-range') || '';
+    let activeView = root.getAttribute('data-view') || 'carousel';
+
+    const setCollectionView = (section) => {
+      const collection = section.querySelector('[data-product-collection]');
+      if (!(collection instanceof HTMLElement)) return;
+      collection.classList.remove('product-track', 'product-grid', 'product-list');
+      collection.classList.add(
+        activeView === 'grid' ? 'product-grid' : activeView === 'list' ? 'product-list' : 'product-track'
+      );
+
+      section.querySelectorAll('[data-product-card]').forEach((card) => {
+        card.classList.toggle('product-card-list', activeView === 'list');
+      });
+    };
+
+    const applyState = () => {
+      const query = normalizeProductText(search instanceof HTMLInputElement ? search.value : '');
+      root.setAttribute('data-view', activeView);
+
+      rangeButtons.forEach((button) => {
+        const pressed = button.getAttribute('data-range') === activeRange;
+        button.setAttribute('aria-pressed', String(pressed));
+      });
+
+      viewButtons.forEach((button) => {
+        const pressed = button.getAttribute('data-view') === activeView;
+        button.setAttribute('aria-pressed', String(pressed));
+      });
+
+      sections.forEach((section) => {
+        if (!(section instanceof HTMLElement)) return;
+        const isActive = section.getAttribute('data-range') === activeRange;
+        section.hidden = !isActive;
+        setCollectionView(section);
+
+        let visibleCount = 0;
+        section.querySelectorAll('[data-product-card]').forEach((card) => {
+          if (!(card instanceof HTMLElement)) return;
+          const matches = !query || String(card.dataset.search || '').includes(query);
+          card.hidden = !matches;
+          if (matches) visibleCount += 1;
+        });
+
+        const emptyState = section.querySelector('[data-empty-state]');
+        if (emptyState instanceof HTMLElement) emptyState.hidden = visibleCount > 0;
+
+        const carouselActions = section.querySelector('[data-carousel-actions]');
+        if (carouselActions instanceof HTMLElement) {
+          carouselActions.hidden = activeView !== 'carousel' || visibleCount === 0;
+        }
+      });
+    };
+
+    const activateFromHash = () => {
+      const match = window.location.hash.match(/^#gamme-(.+)$/);
+      if (!match) return false;
+      const range = match[1];
+      if (!rangeButtons.some((button) => button.getAttribute('data-range') === range)) return false;
+      activeRange = range;
+      applyState();
+      return true;
+    };
+
+    rangeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        activeRange = button.getAttribute('data-range') || activeRange;
+        if (search instanceof HTMLInputElement) search.value = '';
+        applyState();
+      });
+    });
+
+    viewButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        activeView = button.getAttribute('data-view') || activeView;
+        applyState();
+      });
+    });
+
+    search?.addEventListener('input', applyState);
+
+    root.addEventListener('click', (event) => {
+      const button = event.target instanceof Element ? event.target.closest('[data-scroll-products]') : null;
+      if (!(button instanceof HTMLElement)) return;
+      const targetId = button.getAttribute('data-target');
+      const track = targetId ? document.getElementById(targetId) : null;
+      if (!track) return;
+      const direction = button.getAttribute('data-scroll-products') === 'left' ? -1 : 1;
+      track.scrollBy({ left: direction * Math.min(340, track.clientWidth * 0.86), behavior: 'smooth' });
+    });
+
+    window.addEventListener('hashchange', activateFromHash);
+    activateFromHash();
+    applyState();
+  });
+</script>

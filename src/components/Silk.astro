@@ -31,6 +31,7 @@ const config = {
 <script>
   const roots = document.querySelectorAll('[data-silk]:not([data-ready])');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const isMobile = window.matchMedia('(max-width: 700px)');
 
   roots.forEach((root) => {
     root.setAttribute('data-ready', 'true');
@@ -47,6 +48,8 @@ const config = {
     let dpr = 1;
     let raf = 0;
     let noisePattern = null;
+    let active = false;
+    let visible = false;
 
     const hexToRgb = (hex) => {
       const normalized = hex.replace('#', '');
@@ -101,7 +104,7 @@ const config = {
 
     const resize = () => {
       const rect = root.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, isMobile.matches ? 1.1 : 1.45);
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
       canvas.width = Math.floor(width * dpr);
@@ -110,9 +113,15 @@ const config = {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       noisePattern = makeNoisePattern();
+      if (!active) draw(0);
     };
 
     const draw = (time = 0) => {
+      if (time !== 0 && (!active || reduceMotion.matches || document.hidden)) {
+        raf = 0;
+        return;
+      }
+
       ctx.clearRect(0, 0, width, height);
 
       const speed = Number(config.speed || 5) * 0.00024;
@@ -210,27 +219,53 @@ const config = {
         ctx.restore();
       }
 
-      raf = requestAnimationFrame(draw);
+      if (active && !reduceMotion.matches && !document.hidden) {
+        raf = requestAnimationFrame(draw);
+      } else {
+        raf = 0;
+      }
     };
 
     resize();
     window.addEventListener('resize', resize);
 
-    if (reduceMotion.matches) {
-      draw(0);
-      cancelAnimationFrame(raf);
-    } else {
+    const start = () => {
+      if (active || reduceMotion.matches || document.hidden || !visible) return;
+      active = true;
       raf = requestAnimationFrame(draw);
+    };
+
+    const stop = () => {
+      active = false;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      draw(0);
+    };
+
+    const observer = 'IntersectionObserver' in window
+      ? new IntersectionObserver((entries) => {
+          visible = entries.some((entry) => entry.isIntersecting);
+          if (visible) start();
+          else stop();
+        }, { threshold: 0.08 })
+      : null;
+
+    if (observer) observer.observe(root);
+    else {
+      visible = true;
+      start();
     }
 
+    if (reduceMotion.matches) draw(0);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else start();
+    });
+
     reduceMotion.addEventListener?.('change', () => {
-      cancelAnimationFrame(raf);
-      if (reduceMotion.matches) {
-        draw(0);
-        cancelAnimationFrame(raf);
-      } else {
-        raf = requestAnimationFrame(draw);
-      }
+      stop();
+      if (!reduceMotion.matches) start();
     });
   });
 </script>
