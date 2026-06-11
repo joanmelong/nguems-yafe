@@ -104,7 +104,7 @@ const productSearchText = (product: Product) =>
           {
             viewOptions.map((option) => (
               <button
-                class="view-button view-button-icon"
+                class={`view-button view-button-icon ${option.value === 'grid' ? 'view-button-grid' : ''}`}
                 type="button"
                 aria-pressed={option.value === 'carousel' ? 'true' : 'false'}
                 aria-label={`Vue ${option.label}`}
@@ -285,8 +285,15 @@ const productSearchText = (product: Product) =>
     const rangeButtons = Array.from(root.querySelectorAll('[data-range-button]'));
     const viewButtons = Array.from(root.querySelectorAll('[data-view-button]'));
     const sections = Array.from(root.querySelectorAll('[data-range-section]'));
+    const mobileView = window.matchMedia('(max-width: 700px)');
     let activeRange = rangeButtons[0]?.getAttribute('data-range') || '';
     let activeView = root.getAttribute('data-view') || 'carousel';
+
+    const coerceMobileView = () => {
+      if (mobileView.matches && activeView === 'grid') {
+        activeView = 'list';
+      }
+    };
 
     const setCollectionView = (section) => {
       const collection = section.querySelector('[data-product-collection]');
@@ -302,6 +309,7 @@ const productSearchText = (product: Product) =>
     };
 
     const applyState = () => {
+      coerceMobileView();
       const query = normalizeProductText(search instanceof HTMLInputElement ? search.value : '');
       root.setAttribute('data-view', activeView);
 
@@ -359,6 +367,7 @@ const productSearchText = (product: Product) =>
 
     viewButtons.forEach((button) => {
       button.addEventListener('click', () => {
+        if (mobileView.matches && button.getAttribute('data-view') === 'grid') return;
         activeView = button.getAttribute('data-view') || activeView;
         applyState();
       });
@@ -377,6 +386,11 @@ const productSearchText = (product: Product) =>
     });
 
     window.addEventListener('hashchange', activateFromHash);
+    if (mobileView.addEventListener) {
+      mobileView.addEventListener('change', applyState);
+    } else {
+      mobileView.addListener?.(applyState);
+    }
     activateFromHash();
     applyState();
   });
