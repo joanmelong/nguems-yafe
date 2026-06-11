@@ -1,9 +1,5 @@
 ---
-import { contact, products, salesPoints } from '../data/site';
-
-const fallbackHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
-  contact.whatsappMessage
-)}`;
+import { contact, products, salesPointCategories, salesPoints } from '../data/site';
 ---
 
 <section class="section" id="contact" aria-labelledby="contact-title">
@@ -16,15 +12,29 @@ const fallbackHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
         rapide sur WhatsApp.
       </p>
 
-      <div class="sales-list" aria-label="Points de vente">
+      <div class="sales-groups" aria-label="Points de vente">
         {
-          salesPoints.map((point) => (
-            <article class="sales-card">
-              <h3>{point.name}</h3>
-              <p><strong>{point.address}</strong></p>
-              <p>{point.details}</p>
-            </article>
-          ))
+          salesPointCategories.map((category) => {
+            const categoryPoints = salesPoints.filter((point) => point.categories.includes(category.id));
+
+            return (
+              <section class="sales-group" aria-labelledby={`sales-${category.id}`}>
+                <div class="sales-group-head">
+                  <h3 id={`sales-${category.id}`}>{category.label}</h3>
+                  <p>{category.summary}</p>
+                </div>
+                <div class="sales-list">
+                  {categoryPoints.map((point) => (
+                    <article class="sales-card">
+                      <h4>{point.name}</h4>
+                      <p><strong>{point.address}</strong></p>
+                      <p>{point.details}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            );
+          })
         }
       </div>
     </div>
@@ -64,11 +74,6 @@ const fallbackHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
 
         <button class="button button-primary" type="submit">Envoyer sur WhatsApp</button>
       </form>
-
-      <p class="contact-fallback">
-        Sans JavaScript, utilisez le lien direct :
-        <a href={fallbackHref} target="_blank" rel="noopener noreferrer">WhatsApp EREC</a>.
-      </p>
     </div>
   </div>
 </section>

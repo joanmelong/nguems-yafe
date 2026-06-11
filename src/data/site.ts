@@ -4,9 +4,10 @@ import lotionImage from '../assets/products/lait-corporel-hydratant.png';
 import packImage from '../assets/products/pack-nguems.jpeg';
 import packSmallImage from '../assets/products/pack-nguems-300ml.jpeg';
 
-export type ProductRangeId = 'nguems-cosmetics' | 'mavela' | 'packaging';
-export type ProductCategory = 'lait' | 'savon' | 'crème' | 'gel douche' | 'packs';
+export type ProductRangeId = 'nguems-cosmetics' | 'mavela' | 'packaging' | 'formations-erec';
+export type ProductCategory = 'lait' | 'savon' | 'crème' | 'gel douche' | 'packs' | 'formation';
 export type ProductView = 'carousel' | 'grid' | 'list';
+export type SalesPointCategoryId = 'nguems-mavela' | 'materiel-esthetique';
 
 export interface ProductRange {
   id: ProductRangeId;
@@ -40,6 +41,13 @@ export interface SalesPoint {
   name: string;
   address: string;
   details: string;
+  categories: SalesPointCategoryId[];
+}
+
+export interface SalesPointCategory {
+  id: SalesPointCategoryId;
+  label: string;
+  summary: string;
 }
 
 export interface PromoteInfo {
@@ -69,6 +77,7 @@ export const navItems = [
       { label: "Gamme NGUEM'S Cosmetics", href: '#gamme-nguems-cosmetics' },
       { label: 'MAVELA', href: '#gamme-mavela' },
       { label: 'Packaging', href: '#gamme-packaging' },
+      { label: 'Institut & Formations EREC', href: '#gamme-formations-erec' },
     ],
   },
   { label: 'Témoignage', href: '#temoignages' },
@@ -94,6 +103,12 @@ export const productRanges: ProductRange[] = [
     label: 'Packaging',
     summary:
       'Solutions de présentation et conditionnement pour marques, boutiques et revendeurs.',
+  },
+  {
+    id: 'formations-erec',
+    label: 'Institut & Formations EREC',
+    summary:
+      'Parcours de formation en esthétique, cosmétique et coiffure pour apprendre les gestes professionnels.',
   },
 ];
 
@@ -222,6 +237,37 @@ export const products: Product[] = [
     benefits: ['Protection', 'Marque', 'Rayon'],
     image: packSmallImage,
   },
+  {
+    id: 'formation-esthetique',
+    name: 'Formation en esthétique',
+    range: 'formations-erec',
+    category: 'formation',
+    shortDescription:
+      'Programme pratique pour apprendre les soins, l’accueil client et les bases d’un institut.',
+    benefits: ['Soins visage', 'Pratique encadrée', 'Attestation'],
+    image: creamImage,
+    badge: 'Institut',
+  },
+  {
+    id: 'formation-cosmetique',
+    name: 'Formation en cosmétique',
+    range: 'formations-erec',
+    category: 'formation',
+    shortDescription:
+      'Initiation aux routines, aux produits et aux conseils adaptés aux besoins de la peau.',
+    benefits: ['Conseil produit', 'Routines beauté', 'Approche terrain'],
+    image: lotionImage,
+  },
+  {
+    id: 'formation-coiffure',
+    name: 'Formation en coiffure',
+    range: 'formations-erec',
+    category: 'formation',
+    shortDescription:
+      'Formation orientée gestes de base, hygiène, finition et service client en salon.',
+    benefits: ['Gestes techniques', 'Hygiène', 'Service salon'],
+    image: packSmallImage,
+  },
 ];
 
 export const testimonials: Testimonial[] = [
@@ -257,24 +303,47 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
+export const salesPointCategories: SalesPointCategory[] = [
+  {
+    id: 'nguems-mavela',
+    label: "NGUEM'S & MAVELA",
+    summary: 'Produits de soins, routines beauté et commandes des gammes distribuées par EREC.',
+  },
+  {
+    id: 'materiel-esthetique',
+    label: "Matériel d'esthétique",
+    summary: 'Orientation, réservation et matériel pour instituts, apprenants et professionnels.',
+  },
+];
+
 export const salesPoints: SalesPoint[] = [
   {
     id: 'etoudi',
     name: 'Nouvelle boutique EREC Etoudi',
     address: 'Etoudi, Yaoundé',
     details: 'Boutique ouverte pour les achats, conseils produits et commandes.',
+    categories: ['nguems-mavela', 'materiel-esthetique'],
   },
   {
     id: 'promote',
     name: 'PROMOTE 2026',
     address: 'Palais des Congrès de Yaoundé',
     details: 'Stand EREC à confirmer dès attribution officielle.',
+    categories: ['nguems-mavela', 'materiel-esthetique'],
   },
   {
     id: 'whatsapp',
     name: 'Commandes WhatsApp',
     address: 'Livraison et orientation à distance',
     details: 'Contact direct pour disponibilité, prix et conseils.',
+    categories: ['nguems-mavela'],
+  },
+  {
+    id: 'materiel-etoudi',
+    name: "Matériel d'esthétique à Etoudi",
+    address: 'Boutique EREC Etoudi',
+    details: "Point d'information pour le matériel, les formations et les besoins institut.",
+    categories: ['materiel-esthetique'],
   },
 ];
 

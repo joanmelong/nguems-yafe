@@ -462,10 +462,108 @@ textarea {
   gap: 24px;
 }
 
-.value-grid {
+.about-stack-panel {
+  position: relative;
+  min-height: 620px;
+  border: 1px solid rgba(1, 161, 1, 0.12);
+  border-radius: 32px;
+  background: var(--color-green-deep);
+  box-shadow: 0 30px 80px rgba(1, 77, 1, 0.18);
+  overflow: hidden;
+  padding: 26px;
+  isolation: isolate;
+}
+
+.silk {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(251, 206, 77, 0.22), transparent 26rem),
+    linear-gradient(135deg, #021f06, #004d00);
+}
+
+.silk canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.about-stack-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.42)),
+    radial-gradient(circle at 88% 18%, rgba(255, 255, 255, 0.18), transparent 18rem);
+  pointer-events: none;
+}
+
+.scroll-stack-scroller {
+  position: relative;
+  height: min(560px, 72vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 10px 0;
+  outline: none;
+  scroll-behavior: smooth;
+  scrollbar-color: rgba(251, 206, 77, 0.55) rgba(255, 255, 255, 0.12);
+  scrollbar-width: thin;
+}
+
+.scroll-stack-scroller:focus-visible {
+  box-shadow: 0 0 0 3px rgba(251, 206, 77, 0.7);
+}
+
+.scroll-stack-scroller::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-stack-scroller::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+
+.scroll-stack-scroller::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(251, 206, 77, 0.62);
+}
+
+.scroll-stack-inner {
+  position: relative;
+  min-height: 100%;
+  padding: 18px 0 260px;
+}
+
+.scroll-stack-scroller:not([data-ready]) .scroll-stack-inner {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
+  padding-bottom: 18px;
+}
+
+.scroll-stack-card {
+  min-height: 330px;
+  transform-origin: top center;
+}
+
+.scroll-stack-scroller[data-ready]:not([data-reduced-motion]) .scroll-stack-card {
+  transition: filter 120ms linear;
+}
+
+.scroll-stack-end {
+  height: 360px;
+}
+
+.scroll-stack-scroller[data-reduced-motion] .scroll-stack-inner {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 18px;
+}
+
+.scroll-stack-scroller[data-reduced-motion] .scroll-stack-card {
+  margin-bottom: 0 !important;
+  transform: none !important;
+  filter: none !important;
 }
 
 .value-card,
@@ -480,8 +578,16 @@ textarea {
 }
 
 .value-card {
+  position: relative;
+  display: grid;
+  gap: 18px;
   min-height: 210px;
   padding: 26px;
+  border-color: rgba(251, 206, 77, 0.22);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(246, 255, 244, 0.95)),
+    var(--color-white);
+  transform-origin: center top;
 }
 
 .value-icon {
@@ -499,6 +605,7 @@ textarea {
 
 .value-card h3,
 .sales-card h3,
+.sales-card h4,
 .testimonial-card h3,
 .product-card h3 {
   margin: 16px 0 8px;
@@ -512,6 +619,25 @@ textarea {
 .product-card p {
   margin: 0;
   color: var(--color-muted);
+}
+
+.value-card-featured {
+  grid-template-columns: minmax(0, 1fr) 180px;
+  align-items: center;
+}
+
+.value-card-media {
+  overflow: hidden;
+  border-radius: 22px;
+  aspect-ratio: 1 / 0.9;
+  background: linear-gradient(135deg, #edf9ea, #fff6d7);
+  box-shadow: 0 18px 42px rgba(1, 77, 1, 0.18);
+}
+
+.value-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .products-section {
@@ -586,13 +712,26 @@ textarea {
 }
 
 .view-button-icon {
-  width: 44px;
-  height: 44px;
+  display: inline-flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
   padding: 0;
+}
+
+.view-button-icon svg {
+  width: 28px;
+  height: 28px;
 }
 
 .range-section + .range-section {
   margin-top: 48px;
+}
+
+.product-noscript {
+  display: grid;
+  gap: 48px;
 }
 
 .range-header {
@@ -902,14 +1041,45 @@ textarea {
   align-items: start;
 }
 
+.sales-groups {
+  display: grid;
+  gap: 22px;
+  margin-top: 28px;
+}
+
+.sales-group {
+  display: grid;
+  gap: 14px;
+}
+
+.sales-group-head {
+  border-left: 4px solid var(--color-yellow);
+  padding-left: 14px;
+}
+
+.sales-group-head h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.sales-group-head p {
+  margin: 6px 0 0;
+  color: var(--color-muted);
+}
+
 .sales-list {
   display: grid;
   gap: 14px;
-  margin-top: 28px;
 }
 
 .sales-card {
   padding: 20px;
+}
+
+.sales-card h4 {
+  margin-top: 0;
 }
 
 .contact-panel {
@@ -942,6 +1112,36 @@ textarea {
   margin: 14px 0 0;
   color: var(--color-muted);
   font-size: 0.9rem;
+}
+
+.floating-whatsapp {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 60;
+  display: inline-flex;
+  width: 74px;
+  height: 74px;
+  align-items: center;
+  justify-content: center;
+  border: 6px solid rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  background: #25d366;
+  color: var(--color-white);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(1, 161, 1, 0.12);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+}
+
+.floating-whatsapp:hover,
+.floating-whatsapp:focus-visible {
+  transform: translateY(-3px) scale(1.04);
+}
+
+.floating-whatsapp.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.92);
+  pointer-events: none;
 }
 
 .site-footer {
@@ -1178,7 +1378,6 @@ textarea {
     min-height: 320px;
   }
 
-  .value-grid,
   .testimonials-grid {
     grid-template-columns: 1fr;
   }
@@ -1235,6 +1434,33 @@ textarea {
     width: 55%;
   }
 
+  .about-stack-panel {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .scroll-stack-scroller {
+    height: min(520px, 74vh);
+    padding-inline: 2px;
+  }
+
+  .scroll-stack-inner {
+    padding-bottom: 220px;
+  }
+
+  .value-card {
+    position: relative;
+    top: auto;
+  }
+
+  .value-card-featured {
+    grid-template-columns: 1fr;
+  }
+
+  .value-card-media {
+    max-width: 260px;
+  }
+
   .hero-actions,
   .range-header,
   .footer-bottom {
@@ -1262,5 +1488,13 @@ textarea {
 
   .footer-nav-list {
     justify-content: flex-start;
+  }
+
+  .floating-whatsapp {
+    right: 16px;
+    bottom: 16px;
+    width: 64px;
+    height: 64px;
+    border-width: 5px;
   }
 }

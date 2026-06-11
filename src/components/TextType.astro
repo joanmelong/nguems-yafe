@@ -11,6 +11,7 @@ interface Props {
   variableSpeedMin?: number;
   variableSpeedMax?: number;
   cursorBlinkDuration?: number;
+  startDelay?: number;
   class?: string;
 }
 
@@ -26,6 +27,7 @@ const {
   variableSpeedMin = 60,
   variableSpeedMax = 120,
   cursorBlinkDuration = 0.5,
+  startDelay = 0,
   class: className = '',
 } = Astro.props;
 
@@ -42,6 +44,7 @@ const config = {
   variableSpeedMin,
   variableSpeedMax,
   cursorBlinkDuration,
+  startDelay,
 };
 ---
 
@@ -78,7 +81,7 @@ const config = {
     }
 
     let itemIndex = 0;
-    let charIndex = 0;
+    let charIndex = String(value.textContent || '').length;
     let deleting = false;
     let timeout = 0;
 
@@ -97,7 +100,15 @@ const config = {
         value.textContent = current.slice(0, charIndex);
 
         if (charIndex >= current.length) {
-          if (items.length === 1) return;
+          if (items.length === 1) {
+            timeout = window.setTimeout(() => {
+              charIndex = 0;
+              value.textContent = '';
+              tick();
+            }, Number(config.pauseDuration || 1500));
+            return;
+          }
+
           deleting = true;
           timeout = window.setTimeout(tick, Number(config.pauseDuration || 1500));
           return;
@@ -118,7 +129,11 @@ const config = {
       timeout = window.setTimeout(tick, Number(config.deletingSpeed || 50));
     };
 
-    timeout = window.setTimeout(tick, Number(config.typingSpeed || 75));
+    timeout = window.setTimeout(() => {
+      charIndex = 0;
+      value.textContent = '';
+      tick();
+    }, Number(config.startDelay || 0));
 
     reduceMotion.addEventListener?.('change', () => {
       window.clearTimeout(timeout);

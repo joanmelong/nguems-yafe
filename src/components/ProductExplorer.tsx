@@ -32,11 +32,12 @@ const normalize = (value: string) =>
 const shortRangeLabel = (range: ProductRange) => {
   if (range.id === 'nguems-cosmetics') return "NGUEM'S";
   if (range.id === 'mavela') return 'MAVELA';
+  if (range.id === 'formations-erec') return 'Formations';
   return 'Packaging';
 };
 
 const CarouselIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+  <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
     <path
       d="M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"
       fill="none"
@@ -54,7 +55,7 @@ const CarouselIcon = () => (
 );
 
 const GridIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+  <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
     <path
       d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"
       fill="none"
@@ -66,7 +67,7 @@ const GridIcon = () => (
 );
 
 const ListIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+  <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
     <path
       d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"
       fill="none"
@@ -252,6 +253,7 @@ const ProductExplorer = ({ ranges, products, whatsappPhone }: ProductExplorerPro
         {activeRangeData && (
           <section
             className="range-section"
+            data-interactive-products
             id={`gamme-${activeRangeData.id}`}
             aria-labelledby={`title-${activeRangeData.id}`}
           >
@@ -309,6 +311,43 @@ const ProductExplorer = ({ ranges, products, whatsappPhone }: ProductExplorerPro
             )}
           </section>
         )}
+
+        <noscript>
+          <style>{'.range-section[data-interactive-products]{display:none}'}</style>
+          <div className="product-noscript" aria-label="Toutes les gammes produits">
+            {ranges.map((range) => {
+              const rangeProducts = products.filter((product) => product.range === range.id);
+              if (rangeProducts.length === 0) return null;
+
+              return (
+                <section
+                  className="range-section noscript-range"
+                  id={`gamme-${range.id}`}
+                  aria-labelledby={`noscript-title-${range.id}`}
+                  key={range.id}
+                >
+                  <div className="range-header">
+                    <div>
+                      <h3 id={`noscript-title-${range.id}`}>{range.label}</h3>
+                      <p>{range.summary}</p>
+                    </div>
+                  </div>
+                  <div className="product-grid">
+                    {rangeProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        rangeLabel={shortRangeLabel(range)}
+                        view="grid"
+                        whatsappPhone={whatsappPhone}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </noscript>
       </div>
     </section>
   );
