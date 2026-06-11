@@ -365,8 +365,8 @@ export const products: Product[] = [
 export const testimonials: Testimonial[] = [
   {
     id: 'bien-etre-0',
-    name: 'Cliente EREC',
-    location: 'Yaoundé',
+    name: 'Noelle, esthéticienne',
+    location: 'Nkolbisson',
     value: 'Bien-être',
     quote:
       "J'ai découvert une routine plus simple, avec des conseils précis pour ma peau.",
@@ -389,7 +389,7 @@ export const testimonials: Testimonial[] = [
     location: 'Yaoundé',
     value: 'Esthétique',
     quote:
-      "L'équipe prend le temps d'orienter chaque personne vers une routine adaptée.",
+      "'J\'ai pris pour moi hier🥰 Je suis de plus en plus satisfaite! Je peux même déjà faire le shooting 😄😄",
     beforeImage: avant2,
     afterImage: apres2,
   },
@@ -409,17 +409,17 @@ export const testimonials: Testimonial[] = [
     location: 'Bafoussam',
     value: 'Accompagnement',
     quote:
-      'EREC facilite la distribution avec des informations claires et des contacts directs.',
+      'Après 3 semaines d\'utilisation de la marque NGUEM\'S COSMETICS. Hallucinant',
     beforeImage: avant4,
     afterImage: apres4,
   },
   {
     id: 'formation-5',
-    name: 'Apprenante EREC',
-    location: 'Yaoundé',
-    value: 'Formation',
+    name: 'Nina, étudiante',
+    location: 'Belgique',
+    value: 'Routine beauté',
     quote:
-      "L'approche pratique aide à mieux comprendre les gestes et les besoins des clientes.",
+      "Merci beaucoup la crème du visage, le résultat est impeccable😍 C'est le meilleur produit pour le visage.",
     beforeImage: avant5,
     afterImage: apres5,
   },
@@ -449,7 +449,7 @@ export const salesPoints: SalesPoint[] = [
     name: 'Nouvelle boutique EREC Etoudi',
     address: 'Etoudi',
     details: 'Boutique ouverte pour les achats, conseils produits, formations et commandes.',
-    phones: [],
+    phones: ['658982867'],
     categories: ['nguems-mavela', 'materiel-esthetique'],
   },
   {
@@ -499,7 +499,7 @@ export const salesPoints: SalesPoint[] = [
     name: 'Marché Essos',
     address: 'Parfumerie Josiane',
     details: 'Point de vente NGUEM’S & MAVELA.',
-    phones: ['+237672242726'],
+    phones: ['672242726'],
     categories: ['nguems-mavela'],
   },
   {

@@ -389,6 +389,10 @@ textarea {
   color: var(--color-white);
 }
 
+.hero-kicker {
+  color: var(--color-white);
+}
+
 .hero .section-copy {
   max-width: 560px;
   color: rgba(255, 255, 255, 0.78);
@@ -993,6 +997,10 @@ textarea {
 
 .promote-section .section-title,
 .promote-section .section-copy {
+  color: var(--color-white);
+}
+
+.promote-kicker {
   color: var(--color-white);
 }
 
