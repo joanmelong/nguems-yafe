@@ -13,12 +13,12 @@ interface Props {
 
 const {
   label = 'Valeurs et offres EREC',
-  itemDistance = 110,
+  itemDistance = 70,
   itemScale = 0.035,
-  itemStackDistance = 34,
-  stackPosition = '22%',
-  scaleEndPosition = '10%',
-  baseScale = 0.86,
+  itemStackDistance = 24,
+  stackPosition = '18%',
+  scaleEndPosition = '8%',
+  baseScale = 0.88,
   rotationAmount = 0,
   blurAmount = 0,
 } = Astro.props;
@@ -70,10 +70,10 @@ const config = {
     let isUpdating = false;
     const lastTransforms = new Map();
 
-    const itemDistance = Number(config.itemDistance || 110);
+    const itemDistance = Number(config.itemDistance || 70);
     const itemScale = Number(config.itemScale || 0.035);
-    const itemStackDistance = Number(config.itemStackDistance || 34);
-    const baseScale = Number(config.baseScale || 0.86);
+    const itemStackDistance = Number(config.itemStackDistance || 24);
+    const baseScale = Number(config.baseScale || 0.88);
     const rotationAmount = Number(config.rotationAmount || 0);
     const blurAmount = Number(config.blurAmount || 0);
 
@@ -98,8 +98,8 @@ const config = {
 
       const scrollTop = scroller.scrollTop;
       const containerHeight = scroller.clientHeight;
-      const stackPositionPx = parsePosition(config.stackPosition || '22%', containerHeight);
-      const scaleEndPositionPx = parsePosition(config.scaleEndPosition || '10%', containerHeight);
+      const stackPositionPx = parsePosition(config.stackPosition || '18%', containerHeight);
+      const scaleEndPositionPx = parsePosition(config.scaleEndPosition || '8%', containerHeight);
       const endTop = endElement.offsetTop;
 
       let topCardIndex = 0;
@@ -164,6 +164,9 @@ const config = {
       });
     };
 
+    const atScrollStart = () => scroller.scrollTop <= 1;
+    const atScrollEnd = () => scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+
     cards.forEach((card, index) => {
       card.classList.add('scroll-stack-card');
       if (index < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
@@ -178,6 +181,16 @@ const config = {
       return;
     }
 
+    scroller.addEventListener('wheel', (event) => {
+      const leavingTop = event.deltaY < 0 && atScrollStart();
+      const leavingBottom = event.deltaY > 0 && atScrollEnd();
+
+      if (leavingTop || leavingBottom) {
+        return;
+      }
+
+      requestUpdate();
+    }, { passive: false });
     scroller.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', requestUpdate);
     update();

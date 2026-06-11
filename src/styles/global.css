@@ -20,7 +20,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -464,7 +464,7 @@ textarea {
 
 .about-stack-panel {
   position: relative;
-  min-height: 620px;
+  min-height: 500px;
   border: 1px solid rgba(1, 161, 1, 0.12);
   border-radius: 32px;
   background: var(--color-green-deep);
@@ -501,10 +501,12 @@ textarea {
 
 .scroll-stack-scroller {
   position: relative;
-  height: min(560px, 72vh);
+  width: min(100%, 620px);
+  height: min(430px, 58vh);
+  margin-inline: auto;
   overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 10px 10px 0;
+  overscroll-behavior: auto;
+  padding: 8px 8px 0;
   outline: none;
   scroll-behavior: smooth;
   scrollbar-color: rgba(251, 206, 77, 0.55) rgba(255, 255, 255, 0.12);
@@ -532,7 +534,7 @@ textarea {
 .scroll-stack-inner {
   position: relative;
   min-height: 100%;
-  padding: 18px 0 260px;
+  padding: 14px 0 160px;
 }
 
 .scroll-stack-scroller:not([data-ready]) .scroll-stack-inner {
@@ -542,7 +544,7 @@ textarea {
 }
 
 .scroll-stack-card {
-  min-height: 330px;
+  min-height: 270px;
   transform-origin: top center;
 }
 
@@ -551,7 +553,7 @@ textarea {
 }
 
 .scroll-stack-end {
-  height: 360px;
+  height: 220px;
 }
 
 .scroll-stack-scroller[data-reduced-motion] .scroll-stack-inner {
@@ -1440,12 +1442,21 @@ textarea {
   }
 
   .scroll-stack-scroller {
-    height: min(520px, 74vh);
+    width: 100%;
+    height: min(380px, 62vh);
     padding-inline: 2px;
   }
 
   .scroll-stack-inner {
-    padding-bottom: 220px;
+    padding-bottom: 140px;
+  }
+
+  .scroll-stack-card {
+    min-height: 250px;
+  }
+
+  .scroll-stack-end {
+    height: 180px;
   }
 
   .value-card {
