@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import logoImage from '../assets/site/favicon.jpeg';
 import { contact, navItems, siteMeta } from '../data/site';
 
 const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
@@ -9,7 +11,15 @@ const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a class="brand-mark" href="#top" aria-label="Accueil EREC CAMEROUN">
-      <span>{siteMeta.brand}</span>
+      <span class="brand-logo-frame">
+        <Image
+          src={logoImage}
+          alt=""
+          widths={[44, 88]}
+          sizes="44px"
+          loading="eager"
+        />
+      </span>
     </a>
 
     <input class="nav-toggle" type="checkbox" id="nav-toggle" aria-label="Ouvrir le menu" />
@@ -46,3 +56,57 @@ const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
     </label>
   </div>
 </header>
+
+<script>
+  const navToggle = document.querySelector('#nav-toggle');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const closeMobileMenu = () => {
+    if (navToggle instanceof HTMLInputElement) {
+      navToggle.checked = false;
+    }
+  };
+
+  const targetForHash = (hash) => {
+    if (!hash || hash === '#') return null;
+    if (hash.startsWith('#gamme-')) return document.querySelector('#produits');
+    return document.querySelector(hash);
+  };
+
+  const scrollToHash = (hash) => {
+    const target = targetForHash(hash);
+    if (!(target instanceof HTMLElement)) return false;
+
+    target.scrollIntoView({
+      behavior: reduceMotion.matches ? 'auto' : 'smooth',
+      block: 'start',
+    });
+
+    return true;
+  };
+
+  document.addEventListener('click', (event) => {
+    const link = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
+    if (!(link instanceof HTMLAnchorElement)) return;
+
+    const hash = link.getAttribute('href') || '';
+    const target = targetForHash(hash);
+    if (!target) return;
+
+    event.preventDefault();
+    closeMobileMenu();
+
+    if (window.location.hash !== hash) {
+      history.pushState(null, '', hash);
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }
+
+    window.setTimeout(() => {
+      scrollToHash(hash);
+    }, hash.startsWith('#gamme-') ? 40 : 0);
+  });
+
+  window.addEventListener('popstate', () => {
+    scrollToHash(window.location.hash || '#top');
+  });
+</script>

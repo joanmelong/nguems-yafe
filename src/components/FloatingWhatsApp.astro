@@ -22,9 +22,29 @@ const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
   </svg>
 </a>
 
+<button
+  class="floating-back-top"
+  type="button"
+  aria-label="Retourner en haut de page"
+  data-floating-back-top
+>
+  <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M12 19V5m0 0-6 6m6-6 6 6"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2.4"
+    />
+  </svg>
+</button>
+
 <script>
   const button = document.querySelector('[data-floating-whatsapp]');
+  const backTopButton = document.querySelector('[data-floating-back-top]');
   const contactPanel = document.querySelector('[data-contact-form]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   if (button && contactPanel && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver(
@@ -37,5 +57,21 @@ const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
     );
 
     observer.observe(contactPanel);
+  }
+
+  if (backTopButton instanceof HTMLButtonElement) {
+    const updateBackTopVisibility = () => {
+      backTopButton.classList.toggle('is-visible', window.scrollY > 520);
+    };
+
+    backTopButton.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: reduceMotion.matches ? 'auto' : 'smooth',
+      });
+    });
+
+    updateBackTopVisibility();
+    window.addEventListener('scroll', updateBackTopVisibility, { passive: true });
   }
 </script>

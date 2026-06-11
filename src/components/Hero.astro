@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { contact, products, siteMeta } from '../data/site';
+import { contact, heroVisual, siteMeta } from '../data/site';
 import Lightfall from './Lightfall.astro';
 
 const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
@@ -34,7 +34,8 @@ const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
 
   <div class="container hero-inner">
     <div class="hero-content fade-up">
-      <span class="section-kicker">PROMOTE 2026 - Yaoundé</span>
+      <span class="section-kicker hero-kicker">PROMOTE 2026 - Yaoundé</span>
+      <p></p>
       <h1 class="section-heading" id="hero-title">{siteMeta.brand}</h1>
       <p class="section-copy">{siteMeta.subtitle}</p>
       <p class="section-copy">
@@ -49,24 +50,15 @@ const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
       </div>
     </div>
 
-    <div class="hero-product-stack" aria-hidden="true">
-      <div class="hero-product hero-product-primary">
+    <div class="hero-product-stack">
+      <div class="hero-product hero-product-main">
         <Image
-          src={products[0].image}
-          alt=""
-          widths={[360, 540, 720]}
-          sizes="(max-width: 700px) 78vw, 380px"
+          src={heroVisual.image}
+          alt={heroVisual.alt}
+          widths={[420, 640, 860, 1080]}
+          sizes="(max-width: 700px) 92vw, (max-width: 1024px) 62vw, 500px"
           loading="eager"
           fetchpriority="high"
-        />
-      </div>
-      <div class="hero-product hero-product-secondary">
-        <Image
-          src={products[1].image}
-          alt=""
-          widths={[260, 420]}
-          sizes="(max-width: 700px) 55vw, 250px"
-          loading="lazy"
         />
       </div>
     </div>

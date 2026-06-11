@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import logoImage from '../assets/site/favicon.jpeg';
 import { contact, navItems, siteMeta } from '../data/site';
 
 const year = new Date().getFullYear();
@@ -12,7 +14,16 @@ const whatsappHref = `https://wa.me/${contact.phone}?text=${encodeURIComponent(
     <div class="footer-grid">
       <div class="footer-brand">
         <a class="brand-mark" href="#top">
-          <span>{siteMeta.brand}</span>
+          <span class="brand-logo-frame">
+            <Image
+              src={logoImage}
+              alt=""
+              widths={[44, 88]}
+              sizes="44px"
+              loading="lazy"
+            />
+          </span>
+          <span class="brand-name">{siteMeta.brand}</span>
         </a>
         <p>{siteMeta.subtitle}</p>
       </div>
