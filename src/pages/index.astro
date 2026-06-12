@@ -12,7 +12,7 @@ import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
 import Layout from '../layouts/Layout.astro';
 import {
   contact,
-  productRanges,
+  productCatalogRanges,
   products,
   siteMeta,
 } from '../data/site';
@@ -25,7 +25,7 @@ import {
     <NewsBanner />
     <QuiSommesNous />
     <ProductExplorer
-      ranges={productRanges}
+      ranges={productCatalogRanges}
       products={products}
       whatsappPhone={contact.phone}
     />

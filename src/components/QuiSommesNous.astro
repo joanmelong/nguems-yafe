@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { products } from '../data/site';
+import photoFormation from '../assets/site/photo-formation.jpg';
 import ScrollStack from './ScrollStack.astro';
 import Silk from './Silk.astro';
 import TextType from './TextType.astro';
@@ -28,7 +28,7 @@ const values = [
     label: 'Formations EREC',
     text: 'Un institut de beauté qui forme en esthétique, en cosmétique et en coiffure avec une approche pratique.',
     icon: '04',
-    image: products.find((product) => product.id === 'formation-esthetique')?.image || products[0].image,
+    image: photoFormation,
   },
 ];
 ---
@@ -65,8 +65,16 @@ const values = [
       <Silk speed={5} scale={1} color="#01A101" noiseIntensity={1.5} rotation={0} />
       <ScrollStack label="Valeurs et formations EREC">
         {
-          values.map((value) => (
-            <article class:list={['value-card', 'scroll-stack-item', value.image && 'value-card-featured']}>
+          values.map((value, index) => (
+            <article
+              class:list={[
+                'value-card',
+                'scroll-stack-item',
+                'scroll-stack-card',
+                value.image && 'value-card-featured',
+              ]}
+              style={`--stack-index: ${index}; --stack-top: ${12 + index * 22}px; --stack-z: ${10 + index}; --stack-scale: ${0.96 + index * 0.01};`}
+            >
               <div>
                 <span class="value-icon">{value.icon}</span>
                 <h3>{value.label}</h3>
