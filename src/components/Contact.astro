@@ -1,6 +1,8 @@
 ---
 import {
+  categoryLabels,
   contact,
+  productRanges,
   products,
   salesDistributionNote,
   salesPointCategories,
@@ -31,6 +33,11 @@ const groupedSalesPoints = salesPointCategories.map((category) => {
     cities: Array.from(cities, ([city, cityPoints]) => ({ city, points: cityPoints })),
   };
 });
+
+const groupedProducts = productRanges.map((range) => ({
+  ...range,
+  products: products.filter((product) => product.range === range.id),
+}));
 ---
 
 <section class="section" id="contact" aria-labelledby="contact-title">
@@ -115,11 +122,53 @@ const groupedSalesPoints = salesPointCategories.map((category) => {
         </div>
 
         <div class="form-row">
-          <label for="contact-product">Produit</label>
-          <select class="contact-select" id="contact-product" name="product" required>
-            <option value="">Choisir un produit</option>
-            {products.map((product) => <option value={product.name}>{product.name}</option>)}
-          </select>
+          <span class="form-label" id="contact-products-label">Produits</span>
+          <details class="product-picker" data-product-picker>
+            <summary aria-labelledby="contact-products-label">
+              <span data-product-summary>Choisir un ou plusieurs produits</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m6 9 6 6 6-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.2"
+                />
+              </svg>
+            </summary>
+
+            <div class="product-picker-menu" role="group" aria-labelledby="contact-products-label">
+              <div class="product-picker-toolbar">
+                <button class="product-picker-clear" type="button" data-product-clear disabled>
+                  Tout désélectionner
+                </button>
+              </div>
+              {
+                groupedProducts.map((range) => (
+                  <section class="product-picker-group" aria-label={range.label}>
+                    <h3>{range.label}</h3>
+                    <div class="product-picker-options">
+                      {range.products.map((product) => (
+                        <label class="product-check">
+                          <input type="checkbox" name="products" value={product.name} />
+                          <span class="product-check-box" aria-hidden="true"></span>
+                          <span>
+                            <strong>{product.name}</strong>
+                            <small>{categoryLabels[product.category]}</small>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </section>
+                ))
+              }
+            </div>
+          </details>
+          <div class="product-picker-selected" data-product-selected hidden></div>
+          <p class="form-error" data-product-error hidden>
+            Sélectionnez au moins un produit avant l'envoi.
+          </p>
         </div>
 
         <div class="form-row">
@@ -142,18 +191,111 @@ const groupedSalesPoints = salesPointCategories.map((category) => {
   const form = document.querySelector('[data-contact-form]');
 
   if (form instanceof HTMLFormElement) {
+    const picker = form.querySelector('[data-product-picker]');
+    const pickerSummary = picker?.querySelector('summary');
+    const productInputs = Array.from(form.querySelectorAll('input[name="products"]'));
+    const productSummary = form.querySelector('[data-product-summary]');
+    const selectedProductsPreview = form.querySelector('[data-product-selected]');
+    const productError = form.querySelector('[data-product-error]');
+    const clearProductsButton = form.querySelector('[data-product-clear]');
+
+    const getSelectedProducts = () =>
+      productInputs
+        .filter((input) => input instanceof HTMLInputElement && input.checked)
+        .map((input) => input.value.trim())
+        .filter(Boolean);
+
+    const updateProductSummary = () => {
+      const selectedProducts = getSelectedProducts();
+
+      if (productSummary) {
+        productSummary.textContent =
+          selectedProducts.length > 0
+            ? `${selectedProducts.length} produit${selectedProducts.length > 1 ? 's' : ''} sélectionné${
+                selectedProducts.length > 1 ? 's' : ''
+              }`
+            : 'Choisir un ou plusieurs produits';
+      }
+
+      if (selectedProductsPreview instanceof HTMLElement) {
+        selectedProductsPreview.hidden = selectedProducts.length === 0;
+        selectedProductsPreview.replaceChildren();
+
+        selectedProducts.slice(0, 4).forEach((product) => {
+          const tag = document.createElement('span');
+          tag.textContent = product;
+          selectedProductsPreview.append(tag);
+        });
+
+        if (selectedProducts.length > 4) {
+          const moreTag = document.createElement('span');
+          moreTag.textContent = `+${selectedProducts.length - 4}`;
+          selectedProductsPreview.append(moreTag);
+        }
+      }
+
+      if (productError instanceof HTMLElement && selectedProducts.length > 0) {
+        productError.hidden = true;
+      }
+
+      if (clearProductsButton instanceof HTMLButtonElement) {
+        clearProductsButton.disabled = selectedProducts.length === 0;
+      }
+    };
+
+    productInputs.forEach((input) => {
+      input.addEventListener('change', updateProductSummary);
+    });
+
+    clearProductsButton?.addEventListener('click', () => {
+      productInputs.forEach((input) => {
+        if (input instanceof HTMLInputElement) input.checked = false;
+      });
+
+      if (productError instanceof HTMLElement) productError.hidden = true;
+      updateProductSummary();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!(picker instanceof HTMLDetailsElement) || !picker.open) return;
+      const target = event.target;
+      if (target instanceof Node && !picker.contains(target)) {
+        picker.open = false;
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && picker instanceof HTMLDetailsElement && picker.open) {
+        picker.open = false;
+        pickerSummary?.focus();
+      }
+    });
+
+    updateProductSummary();
+
     form.addEventListener('submit', (event) => {
       event.preventDefault();
 
       const data = new FormData(form);
       const name = String(data.get('name') || '').trim();
-      const product = String(data.get('product') || '').trim();
+      const selectedProducts = getSelectedProducts();
       const message = String(data.get('message') || '').trim();
+
+      if (selectedProducts.length === 0) {
+        if (productError instanceof HTMLElement) productError.hidden = false;
+        if (picker instanceof HTMLDetailsElement) picker.open = true;
+        pickerSummary?.focus();
+        return;
+      }
 
       const lines = [
         'Bonjour EREC CAMEROUN,',
         name ? `Je suis ${name}.` : '',
-        product ? `Je souhaite des informations sur : ${product}.` : '',
+        selectedProducts.length === 1
+          ? `Je souhaite des informations sur : ${selectedProducts[0]}.`
+          : `Je souhaite des informations sur les produits/services suivants :\n${selectedProducts
+              .map((product) => `- ${product}`)
+              .join('\n')}`,
         message ? `Message : ${message}` : '',
       ].filter(Boolean);
 

@@ -250,7 +250,9 @@ textarea {
 }
 
 .site-nav {
+  display: flex;
   flex: 1 1 auto;
+  justify-content: center;
 }
 
 .header-actions {
@@ -277,8 +279,21 @@ textarea {
   position: relative;
 }
 
+@media (min-width: 1025px) {
+  .has-submenu::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    right: -12px;
+    left: -12px;
+    height: 16px;
+  }
+}
+
 .submenu {
   position: absolute;
+  z-index: 2;
   top: calc(100% + 8px);
   left: 0;
   min-width: 260px;
@@ -517,16 +532,19 @@ textarea {
 
 .scroll-stack-scroller {
   position: relative;
-  width: min(100%, 620px);
-  height: min(430px, 58vh);
+  width: min(100%, 560px);
+  height: min(390px, 56vh);
   margin-inline: auto;
   overflow-y: auto;
-  overscroll-behavior: auto;
+  overscroll-behavior-y: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 8px 8px 0;
   outline: none;
   scroll-behavior: auto;
   scrollbar-color: rgba(251, 206, 77, 0.55) rgba(255, 255, 255, 0.12);
   scrollbar-width: thin;
+  contain: paint style;
 }
 
 .scroll-stack-scroller:focus-visible {
@@ -549,39 +567,50 @@ textarea {
 
 .scroll-stack-inner {
   position: relative;
-  min-height: 100%;
-  padding: 14px 0 160px;
-}
-
-.scroll-stack-scroller:not([data-ready]) .scroll-stack-inner {
   display: grid;
-  gap: 18px;
-  padding-bottom: 18px;
+  gap: var(--stack-item-distance, 52px);
+  min-height: 100%;
+  padding: 10px 0 86px;
+  view-timeline-name: --cards-scroll;
+  view-timeline-axis: block;
 }
 
 .scroll-stack-card {
-  min-height: 270px;
+  position: sticky;
+  top: var(--stack-top, 12px);
+  z-index: var(--stack-z, 1);
+  min-height: 238px;
   transform-origin: top center;
-}
-
-.scroll-stack-scroller[data-ready]:not([data-reduced-motion]) .scroll-stack-card {
-  transition: filter 120ms linear;
+  will-change: transform;
 }
 
 .scroll-stack-end {
-  height: 220px;
+  height: 92px;
 }
 
-.scroll-stack-scroller[data-reduced-motion] .scroll-stack-inner {
-  display: grid;
-  gap: 18px;
-  padding-bottom: 18px;
+@supports (animation-timeline: view()) {
+  .scroll-stack-card {
+    animation: scroll-stack-settle linear both;
+    animation-timeline: --cards-scroll;
+    animation-range: entry 0% exit 82%;
+  }
 }
 
-.scroll-stack-scroller[data-reduced-motion] .scroll-stack-card {
-  margin-bottom: 0 !important;
-  transform: none !important;
-  filter: none !important;
+@keyframes scroll-stack-settle {
+  from {
+    transform: translate3d(0, 14px, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0) scale(var(--stack-scale, 0.98));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-stack-card {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
 .value-card,
@@ -1177,9 +1206,222 @@ textarea {
   gap: 6px;
 }
 
-.form-row label {
+.form-row label,
+.form-label {
   color: var(--color-slate);
   font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.product-picker {
+  position: relative;
+}
+
+.product-picker summary {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(1, 161, 1, 0.18);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 255, 244, 0.92)),
+    var(--color-white);
+  color: var(--color-ink);
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  outline: none;
+}
+
+.product-picker summary::-webkit-details-marker {
+  display: none;
+}
+
+.product-picker summary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(252, 255, 85, 0.75);
+}
+
+.product-picker summary svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  color: var(--color-green-dark);
+  transition: transform 160ms ease;
+}
+
+.product-picker[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.product-picker-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 12;
+  display: grid;
+  max-height: min(430px, 58vh);
+  gap: 14px;
+  overflow: auto;
+  border: 1px solid rgba(1, 161, 1, 0.18);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 24px 62px rgba(1, 77, 1, 0.2);
+  padding: 14px;
+}
+
+.product-picker-toolbar {
+  position: sticky;
+  top: -14px;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin: -14px -14px 0;
+  border-bottom: 1px solid rgba(1, 161, 1, 0.1);
+  border-radius: 22px 22px 0 0;
+  background: rgba(255, 255, 255, 0.98);
+  padding: 12px 14px;
+}
+
+.product-picker-clear {
+  border: 1px solid rgba(1, 161, 1, 0.18);
+  border-radius: 999px;
+  background: rgba(1, 161, 1, 0.08);
+  color: var(--color-green-dark);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.product-picker-clear:hover:not(:disabled),
+.product-picker-clear:focus-visible {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
+
+.product-picker-clear:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.product-picker-group {
+  display: grid;
+  gap: 8px;
+}
+
+.product-picker-group h3 {
+  margin: 0;
+  color: var(--color-green-dark);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.product-picker-options {
+  display: grid;
+  gap: 8px;
+}
+
+.product-check {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  border: 1px solid rgba(1, 161, 1, 0.12);
+  border-radius: 16px;
+  background: rgba(246, 255, 244, 0.74);
+  padding: 10px;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.product-check:hover,
+.product-check:focus-within {
+  border-color: rgba(251, 206, 77, 0.82);
+  background: rgba(251, 206, 77, 0.14);
+}
+
+.product-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.product-check-box {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(1, 161, 1, 0.38);
+  border-radius: 7px;
+  background: var(--color-white);
+}
+
+.product-check-box::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--color-ink);
+  border-width: 0 2px 2px 0;
+  opacity: 0;
+  transform: rotate(45deg) scale(0.8);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.product-check input:checked + .product-check-box {
+  border-color: var(--color-yellow);
+  background: var(--color-yellow);
+}
+
+.product-check input:checked + .product-check-box::after {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+}
+
+.product-check strong,
+.product-check small {
+  display: block;
+}
+
+.product-check strong {
+  color: var(--color-ink);
+  font-size: 0.93rem;
+  line-height: 1.22;
+}
+
+.product-check small {
+  margin-top: 3px;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.product-picker-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.product-picker-selected span {
+  border: 1px solid rgba(1, 161, 1, 0.16);
+  border-radius: 999px;
+  background: rgba(1, 161, 1, 0.08);
+  color: var(--color-green-dark);
+  padding: 5px 9px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.form-error {
+  margin: 0;
+  color: #9c1b1b;
+  font-size: 0.86rem;
   font-weight: 800;
 }
 
@@ -1586,25 +1828,23 @@ textarea {
 
   .scroll-stack-scroller {
     width: 100%;
-    height: min(380px, 62vh);
+    height: min(340px, 54vh);
     padding-inline: 2px;
   }
 
   .scroll-stack-inner {
-    padding-bottom: 140px;
+    gap: 38px;
+    padding-bottom: 70px;
   }
 
   .scroll-stack-card {
-    min-height: 250px;
+    position: sticky;
+    top: var(--stack-top, 10px);
+    min-height: 220px;
   }
 
   .scroll-stack-end {
-    height: 180px;
-  }
-
-  .value-card {
-    position: relative;
-    top: auto;
+    height: 64px;
   }
 
   .value-card-featured {

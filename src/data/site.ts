@@ -119,7 +119,6 @@ export const navItems = [
       { label: "Gamme NGUEM'S Cosmetics", href: '#gamme-nguems-cosmetics' },
       { label: 'MAVELA', href: '#gamme-mavela' },
       { label: 'Packaging', href: '#gamme-packaging' },
-      { label: 'Institut & Formations EREC', href: '#gamme-formations-erec' },
     ],
   },
   { label: 'Témoignage', href: '#temoignages' },
@@ -151,6 +150,10 @@ export const productRanges: ProductRange[] = [
       'Parcours de formation en esthétique, cosmétique et coiffure pour apprendre les gestes professionnels.',
   },
 ];
+
+export const productCatalogRanges = productRanges.filter(
+  (range) => range.id !== 'formations-erec'
+);
 
 export const categoryLabels: Record<ProductCategory, string> = {
   lait: 'Lait',
@@ -446,8 +449,8 @@ export const salesPoints: SalesPoint[] = [
     id: 'erec-etoudi',
     country: 'Cameroun',
     city: 'Yaoundé',
-    name: 'Nouvelle boutique EREC Etoudi',
-    address: 'Etoudi',
+    name: 'Marché Etoudi - Boutique MZ36',
+    address: 'Face hôtel Prestige',
     details: 'Boutique ouverte pour les achats, conseils produits, formations et commandes.',
     phones: ['658982867'],
     categories: ['nguems-mavela', 'materiel-esthetique'],
