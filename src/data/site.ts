@@ -220,6 +220,7 @@ export const products: Product[] = [
     name: 'MAVELA Détox et bien-être',
     range: 'mavela',
     category: 'tisane',
+    priceLabel: '6 500 FCFA',
     shortDescription:
       'Infusion bien-être pensée pour accompagner les routines naturelles du quotidien.',
     benefits: ['Détox', 'Bien-être', 'Routine interne'],
@@ -231,6 +232,7 @@ export const products: Product[] = [
     name: 'MAVELA Hibiscus Cannelle',
     range: 'mavela',
     category: 'the',
+    priceLabel: '6 500 FCFA',
     shortDescription:
       'Association hibiscus et cannelle pour une boisson aromatique et réconfortante.',
     benefits: ['Hibiscus', 'Cannelle', 'Saveur chaude'],
@@ -241,6 +243,7 @@ export const products: Product[] = [
     name: 'MAVELA Okum Zon',
     range: 'mavela',
     category: 'tisane',
+    priceLabel: '6 500 FCFA',
     shortDescription:
       'Tisane de caractère pour compléter une approche bien-être simple et locale.',
     benefits: ['Plantes', 'Bien-être', 'Made in Cameroon'],
