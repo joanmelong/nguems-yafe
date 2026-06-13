@@ -230,6 +230,10 @@ const config = {
     window.addEventListener('resize', resize);
 
     const start = () => {
+      if (isMobile.matches) {
+        draw(0);
+        return;
+      }
       if (active || reduceMotion.matches || document.hidden || !visible) return;
       active = true;
       raf = requestAnimationFrame(draw);
@@ -263,9 +267,17 @@ const config = {
       else start();
     });
 
-    reduceMotion.addEventListener?.('change', () => {
+    const handleMotionModeChange = () => {
       stop();
-      if (!reduceMotion.matches) start();
-    });
+      if (reduceMotion.matches || isMobile.matches) draw(0);
+      else start();
+    };
+
+    reduceMotion.addEventListener?.('change', handleMotionModeChange);
+    if (isMobile.addEventListener) {
+      isMobile.addEventListener('change', handleMotionModeChange);
+    } else {
+      isMobile.addListener?.(handleMotionModeChange);
+    }
   });
 </script>
