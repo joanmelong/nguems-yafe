@@ -539,12 +539,12 @@ textarea {
   overscroll-behavior-y: auto;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   padding: 8px 8px 0;
   outline: none;
   scroll-behavior: auto;
   scrollbar-color: rgba(251, 206, 77, 0.55) rgba(255, 255, 255, 0.12);
   scrollbar-width: thin;
-  contain: paint style;
 }
 
 .scroll-stack-scroller:focus-visible {
@@ -571,8 +571,6 @@ textarea {
   gap: var(--stack-item-distance, 52px);
   min-height: 100%;
   padding: 10px 0 86px;
-  view-timeline-name: --cards-scroll;
-  view-timeline-axis: block;
 }
 
 .scroll-stack-card {
@@ -581,36 +579,10 @@ textarea {
   z-index: var(--stack-z, 1);
   min-height: 238px;
   transform-origin: top center;
-  will-change: transform;
 }
 
 .scroll-stack-end {
   height: 92px;
-}
-
-@supports (animation-timeline: view()) {
-  .scroll-stack-card {
-    animation: scroll-stack-settle linear both;
-    animation-timeline: --cards-scroll;
-    animation-range: entry 0% exit 82%;
-  }
-}
-
-@keyframes scroll-stack-settle {
-  from {
-    transform: translate3d(0, 14px, 0) scale(1);
-  }
-
-  to {
-    transform: translate3d(0, 0, 0) scale(var(--stack-scale, 0.98));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scroll-stack-card {
-    animation: none !important;
-    transform: none !important;
-  }
 }
 
 .value-card,
@@ -884,6 +856,17 @@ textarea {
 .product-card h3 {
   margin: 0;
   min-height: 2.4em;
+}
+
+.product-price {
+  width: fit-content;
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(1, 161, 1, 0.1);
+  color: var(--color-green-dark);
+  padding: 5px 9px;
+  font-size: 0.86rem;
+  font-weight: 900;
 }
 
 .product-meta {

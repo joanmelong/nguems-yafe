@@ -31,8 +31,11 @@ const makeWhatsappHref = (product: Product) => {
   const message = [
     'Bonjour EREC CAMEROUN,',
     `Je souhaite avoir des informations sur : ${product.name}.`,
+    product.priceLabel ? `Prix : ${product.priceLabel}.` : '',
     `Gamme : ${product.range}.`,
-  ].join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 
   return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
 };
@@ -49,6 +52,7 @@ const productSearchText = (product: Product) =>
       product.name,
       product.category,
       categoryLabels[product.category],
+      product.priceLabel || '',
       product.shortDescription,
       ...product.benefits,
     ].join(' ')
@@ -242,6 +246,7 @@ const productSearchText = (product: Product) =>
                           <span>{categoryLabels[product.category]}</span>
                         </div>
                         <h3>{product.name}</h3>
+                        {product.priceLabel && <p class="product-price">{product.priceLabel}</p>}
                         <p>{product.shortDescription}</p>
                         <ul class="product-benefits" aria-label={`Bienfaits de ${product.name}`}>
                           {product.benefits.map((benefit) => <li>{benefit}</li>)}
