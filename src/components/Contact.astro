@@ -155,7 +155,10 @@ const groupedProducts = productRanges.map((range) => ({
                           <span class="product-check-box" aria-hidden="true"></span>
                           <span>
                             <strong>{product.name}</strong>
-                            <small>{categoryLabels[product.category]}</small>
+                            <small>
+                              {categoryLabels[product.category]}
+                              {product.priceLabel ? ` - ${product.priceLabel}` : ''}
+                            </small>
                           </span>
                         </label>
                       ))}

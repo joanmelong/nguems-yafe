@@ -886,6 +886,17 @@ textarea {
   min-height: 2.4em;
 }
 
+.product-price {
+  width: fit-content;
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(1, 161, 1, 0.1);
+  color: var(--color-green-dark);
+  padding: 5px 9px;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
 .product-meta {
   display: flex;
   flex-wrap: wrap;

@@ -54,6 +54,7 @@ export interface Product {
   name: string;
   range: ProductRangeId;
   category: ProductCategory;
+  priceLabel?: string;
   shortDescription: string;
   benefits: string[];
   image: ImageMetadata;
@@ -170,9 +171,10 @@ export const categoryLabels: Record<ProductCategory, string> = {
 export const products: Product[] = [
   {
     id: 'nguems-lait-hydratant',
-    name: "Lait corporel hydratant NGUEM'S",
+    name: "Lait à l'huile de coco NGUEM'S",
     range: 'nguems-cosmetics',
     category: 'lait',
+    priceLabel: '7 500 FCFA',
     shortDescription:
       'Hydratation quotidienne à la texture légère pour une peau douce et lumineuse.',
     benefits: ['Hydratation', 'Confort', 'Routine quotidienne'],
@@ -184,6 +186,7 @@ export const products: Product[] = [
     name: "Crème visage clarifiante NGUEM'S",
     range: 'nguems-cosmetics',
     category: 'creme',
+    priceLabel: '4 000 FCFA',
     shortDescription:
       "Soin visage pour accompagner l'éclat naturel et l'uniformité du teint.",
     benefits: ['Eclat', 'Teint unifié', 'Texture douce'],
@@ -194,6 +197,7 @@ export const products: Product[] = [
     name: "Savon soin NGUEM'S",
     range: 'nguems-cosmetics',
     category: 'savon',
+    priceLabel: '2 000 FCFA',
     shortDescription:
       'Nettoyage simple et efficace pour préparer la peau avant les soins.',
     benefits: ['Nettoyage', 'Fraîcheur', 'Usage quotidien'],
@@ -204,6 +208,7 @@ export const products: Product[] = [
     name: "Pack routine NGUEM'S",
     range: 'nguems-cosmetics',
     category: 'packs',
+    priceLabel: 'Pack 500 ml : 15 500 FCFA et pack 300 ml : 13 500 FCFA',
     shortDescription:
       "Une routine complète pour découvrir les essentiels NGUEM'S Cosmetics.",
     benefits: ['Routine complète', 'Offre découverte', 'Conseil en boutique'],
